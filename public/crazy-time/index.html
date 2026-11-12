@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Crazy Time — Complete Edition (New + Old + ZIP Downloader)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Pacifico&family=Rye&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #09070b;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+    .app-shell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 50px rgba(0,0,0,0.95);
+      background: #176938;
+      transition: background 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .app-shell.phase-spin {
+      background: linear-gradient(180deg, #65470d 0%, #835d15 35%, #5c400a 100%);
+    }
+    .app-shell.phase-betting {
+      background: linear-gradient(180deg, #1b6d3c 0%, #176536 60%, #104d27 100%);
+    }
+
+    /* Top Stage / Studio Area */
+    .stage-wrapper {
+      position: relative;
+      width: 100%;
+      height: 35%;
+      min-height: 220px;
+      max-height: 380px;
+      overflow: hidden;
+      background: #1a091e;
+      transition: height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+    .app-shell.phase-spin .stage-wrapper {
+      height: 47%;
+    }
+
+    /* 3-State Camera System matching 1000098310.mp4 */
+    .stage-camera {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-origin: 50.0% 17.5%;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .stage-camera.cam-topslot {
+      transform: translateY(24%) scale(0.84);
+    }
+    .stage-camera.zoom-wheel-top {
+      transform: scale(2.35) translateY(5%);
+    }
+
+    .stage-bottom-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 34px;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(23,101,54,0.96) 100%);
+      transition: background 0.6s ease;
+      z-index: 12;
+    }
+    .app-shell.phase-spin .stage-bottom-fade {
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(122,87,20,0.98) 100%);
+    }
+
+    /* 3-Row Vertical Scrolling Top Slot Machine */
+    .top-slot-machine {
+      position: absolute;
+      top: -220px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82%;
+      height: 146px;
+      z-index: 20;
+      background: linear-gradient(180deg, #7c6028 0%, #3d2e0f 50%, #7c6028 100%);
+      border: 4px solid #d8b560;
+      border-radius: 8px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.88), inset 0 0 12px rgba(0,0,0,0.8);
+      transition: top 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      padding: 6px;
+      gap: 5px;
+    }
+    .top-slot-machine.active {
+      top: 4px;
+    }
+    .top-slot-reel {
+      flex: 1;
+      background: linear-gradient(180deg, #8fa19e 0%, #eef5f3 20%, #ffffff 50%, #dce7e5 80%, #839491 100%);
+      border: 2px solid #2b2210;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+      box-shadow: inset 0 14px 20px rgba(0,0,0,0.48), inset 0 -14px 20px rgba(0,0,0,0.48);
+    }
+    .top-slot-payline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      background: rgba(30, 25, 15, 0.65);
+      z-index: 5;
+      pointer-events: none;
+    }
+    .top-slot-machine.matched {
+      border-color: #ffe66d;
+      box-shadow: 0 0 28px #ffcc00, 0 12px 28px rgba(0,0,0,0.85);
+    }
+
+    /* Betting Grid Area */
+    .betting-section {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2px 10px 6px 10px;
+      z-index: 15;
+      min-height: 0;
+    }
+    .cards-grid-wrap {
+      position: relative;
+      width: 100%;
+      margin: 0 auto;
+      transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+    }
+    .app-shell.phase-spin .cards-grid-wrap {
+      width: 68%;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 6px 8px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .bet-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+      border: 2.5px solid rgba(255,255,255,0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    .bet-card:active {
+      transform: scale(0.97);
+    }
+    .app-shell.phase-spin .bet-card {
+      filter: brightness(0.84) contrast(0.95);
+    }
+    .bet-card.winner-glow {
+      filter: brightness(1.22) contrast(1.08) !important;
+      box-shadow: 0 0 22px 5px #ffd700, 0 0 8px 2px #ffffff !important;
+      z-index: 25;
+      animation: pulseWinCard 0.65s infinite alternate;
+    }
+    @keyframes pulseWinCard {
+      from { transform: scale(1); }
+      to { transform: scale(1.045); }
+    }
+
+    .multibet-btn {
+      position: absolute;
+      left: 50%;
+      width: 54px;
+      height: 54px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 22;
+      cursor: pointer;
+      transition: opacity 0.35s ease, transform 0.2s ease;
+      background: conic-gradient(#4ea8de, #f9c74f, #f94144, #90be6d, #577590, #4ea8de);
+      border: 2.5px solid #ffe699;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7), inset 0 0 8px rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .app-shell.phase-spin .multibet-btn {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    .placed-chip {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 10px;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.7), inset 0 0 0 3px rgba(255,255,255,0.85);
+      z-index: 18;
+      pointer-events: none;
+    }
+
+    .card-mult-badge {
+      position: absolute;
+      right: 4px;
+      top: -6px;
+      background: linear-gradient(180deg, #fff6b3 0%, #f5b700 50%, #a86400 100%);
+      color: #ffffff;
+      -webkit-text-stroke: 1px #421c00;
+      font-weight: 900;
+      font-size: 15px;
+      padding: 0px 6px;
+      border-radius: 5px;
+      border: 1.5px solid #ffe066;
+      box-shadow: 0 0 14px #ffcc00, 0 2px 5px rgba(0,0,0,0.85);
+      z-index: 24;
+      animation: multPop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    @keyframes multPop {
+      0% { transform: scale(0) translateY(-15px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+
+    .hist-badge {
+      height: 22px;
+      min-width: 28px;
+      padding: 0 5px;
+      border-radius: 6px 6px 10px 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Rye', serif;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1.5px solid #e7d192;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+
+    .bet-only-control {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .app-shell.phase-spin .bet-only-control {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.85);
+    }
+
+    .zoom-win-shield {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%) scale(0);
+      width: 84px;
+      height: 72px;
+      border-radius: 16px 16px 32px 32px;
+      border: 3px solid #f6d878;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 26;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.85), inset 0 0 15px rgba(255,255,255,0.45);
+      transition: transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+    .zoom-win-shield.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center">
+
+  <div id="appShell" class="app-shell phase-betting">
+
+    <!-- TOP FLOATING CONTROLS (Including 1-Click ZIP Download of New + Old Versions) -->
+    <div class="absolute top-1.5 left-0 right-0 z-30 flex items-center justify-between px-2.5 pointer-events-none">
+      <div class="flex items-center gap-1 pointer-events-auto">
+        <button id="btnSpinNow" class="bg-black/70 hover:bg-black/85 text-amber-300 border border-amber-400/50 rounded-full px-2.5 py-1 text-[11px] font-bold flex items-center gap-1 shadow-lg backdrop-blur-sm active:scale-95">
+          <span>⚡</span> <span id="spinBtnLabel">SPIN</span>
+        </button>
+        <button id="btnDownloadZip" class="bg-emerald-600/90 hover:bg-emerald-500 text-white border border-emerald-300/60 rounded-full px-2.5 py-1 text-[11px] font-extrabold flex items-center gap-1 shadow-lg backdrop-blur-sm active:scale-95">
+          <span>📦</span> <span id="zipBtnLabel">Download ZIP</span>
+        </button>
+      </div>
+
+      <button id="btnMuteToggle" class="pointer-events-auto bg-black/70 hover:bg-black/85 text-white border border-white/20 rounded-full px-3 py-1 text-[11px] font-medium flex items-center gap-1 shadow-lg backdrop-blur-md active:scale-95">
+        <span id="muteIcon">🔇</span>
+        <span id="muteText">Unmute</span>
+      </button>
+
+      <!-- Single Circular Countdown Timer -->
+      <div id="timerWidget" class="relative w-12 h-12 flex items-center justify-center transition-opacity duration-300">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r="18" fill="rgba(0,0,0,0.72)" stroke="rgba(255,255,255,0.18)" stroke-width="4" />
+          <circle id="timerRing" cx="22" cy="22" r="18" fill="none" stroke="#18d259" stroke-width="4" stroke-linecap="round" stroke-dasharray="113.1" stroke-dashoffset="0" />
+        </svg>
+        <span id="timerDigits" class="absolute text-white font-extrabold text-xl tracking-tight">10</span>
+      </div>
+    </div>
+
+    <!-- TOP STUDIO & WHEEL AREA -->
+    <div class="stage-wrapper">
+      <!-- 3-Row Vertical Scrolling Top Slot Machine -->
+      <div id="topSlotMachine" class="top-slot-machine">
+        <div class="top-slot-reel">
+          <div class="top-slot-payline"></div>
+          <div id="slotLeftTop" class="text-[11px] font-bold text-zinc-500 opacity-70">1</div>
+          <div id="slotReelLeft" class="text-center font-black text-lg tracking-tight leading-none select-none">CASH HUNT</div>
+          <div id="slotLeftBot" class="text-[11px] font-bold text-zinc-500 opacity-70">10</div>
+        </div>
+        <div class="top-slot-reel">
+          <div class="top-slot-payline"></div>
+          <div id="slotRightTop" class="text-sm font-black text-amber-700/70">3x</div>
+          <div id="slotReelRight" class="text-center font-black text-3xl tracking-tighter leading-none select-none" style="color:#d9381e; -webkit-text-stroke: 1.2px #ffd700;">2x</div>
+          <div id="slotRightBot" class="text-sm font-black text-amber-700/70">10x</div>
+        </div>
+      </div>
+
+      <!-- Unified Studio + 4x Ultra-HD Vector Wheel + Animated Female Host Canvas -->
+      <div id="stageCamera" class="stage-camera">
+        <canvas id="wheelCanvas" width="1800" height="1160" class="w-full h-full block object-cover object-top"></canvas>
+      </div>
+
+      <!-- Shield Popup on Wheel -->
+      <div id="zoomWinShield" class="zoom-win-shield">
+        <span id="zoomWinText" class="text-3xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]" style="font-family:'Rye',serif;">2x</span>
+        <span id="zoomWinMult" class="hidden text-[10px] font-extrabold bg-amber-400 text-black px-2 rounded-full mt-0.5"></span>
+      </div>
+
+      <!-- NEXT GAME SOON Banner -->
+      <div id="nextGameBanner" class="absolute left-0 right-0 bottom-3.5 z-20 text-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <span id="stageStatusBanner" class="text-white font-semibold tracking-wide text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">
+          NEXT GAME SOON
+        </span>
+      </div>
+
+      <div class="stage-bottom-fade"></div>
+    </div>
+
+    <!-- RECENT RESULTS HISTORY STRIP -->
+    <div id="historyRowWrap" class="bet-only-control px-2.5 py-1 flex items-center justify-between gap-1.5 z-20">
+      <div id="historyStrip" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full justify-between"></div>
+    </div>
+
+    <!-- MAIN BETTING GRID & CONTROLS -->
+    <div class="betting-section">
+      <div class="cards-grid-wrap">
+        <div class="cards-grid">
+          <div class="bet-card" data-spot="1" id="card-1" style="background:linear-gradient(135deg,#5a7d7c,#395656);">
+            <div class="px-3 py-0.5 rounded-b-xl bg-black/35 border border-white/30 font-black text-2xl" style="font-family:'Rye',serif;">1</div>
+            <span class="absolute bottom-0.5 text-[9px] font-bold bg-black/50 px-2 rounded">PAYS 1X</span>
+            <div id="mult-1" class="card-mult-badge hidden"></div>
+            <div id="chip-1" class="placed-chip hidden"></div>
+          </div>
+          <div class="bet-card" data-spot="2" id="card-2" style="background:linear-gradient(135deg,#b59449,#7a6022);">
+            <div class="px-3 py-0.5 rounded-b-xl bg-black/35 border border-white/30 font-black text-2xl" style="font-family:'Rye',serif;">2</div>
+            <span class="absolute bottom-0.5 text-[9px] font-bold bg-black/50 px-2 rounded">PAYS 2X</span>
+            <div id="mult-2" class="card-mult-badge hidden"></div>
+            <div id="chip-2" class="placed-chip hidden"></div>
+          </div>
+
+          <div class="bet-card" data-spot="5" id="card-5" style="background:linear-gradient(135deg,#a3787d,#6b494e);">
+            <div class="px-3 py-0.5 rounded-b-xl bg-black/35 border border-white/30 font-black text-2xl" style="font-family:'Rye',serif;">5</div>
+            <span class="absolute bottom-0.5 text-[9px] font-bold bg-black/50 px-2 rounded">PAYS 5X</span>
+            <div id="mult-5" class="card-mult-badge hidden"></div>
+            <div id="chip-5" class="placed-chip hidden"></div>
+          </div>
+          <div class="bet-card" data-spot="10" id="card-10" style="background:linear-gradient(135deg,#7d7996,#4e4a66);">
+            <div class="px-3 py-0.5 rounded-b-xl bg-black/35 border border-white/30 font-black text-2xl" style="font-family:'Rye',serif;">10</div>
+            <span class="absolute bottom-0.5 text-[9px] font-bold bg-black/50 px-2 rounded">PAYS 10X</span>
+            <div id="mult-10" class="card-mult-badge hidden"></div>
+            <div id="chip-10" class="placed-chip hidden"></div>
+          </div>
+
+          <div class="bet-card" data-spot="CoinFlip" id="card-CoinFlip" style="background:linear-gradient(135deg,#3b6e8c,#1f4257);border-color:#5bc0be;">
+            <div class="font-black text-base text-amber-300 leading-tight text-center drop-shadow" style="font-family:'Cinzel Decorative',serif;">COIN<br>FLIP</div>
+            <span class="absolute bottom-0.5 text-[8px] font-bold bg-amber-950/80 text-amber-200 px-2 rounded">BONUS GAME</span>
+            <div id="mult-CoinFlip" class="card-mult-badge hidden"></div>
+            <div id="chip-CoinFlip" class="placed-chip hidden"></div>
+          </div>
+          <div class="bet-card" data-spot="Pachinko" id="card-Pachinko" style="background:linear-gradient(135deg,#9c4176,#611f47);border-color:#f783ac;">
+            <div class="font-bold text-xl text-amber-300 drop-shadow" style="font-family:'Pacifico',cursive;">Pachinko</div>
+            <span class="absolute bottom-0.5 text-[8px] font-bold bg-amber-950/80 text-amber-200 px-2 rounded">BONUS GAME</span>
+            <div id="mult-Pachinko" class="card-mult-badge hidden"></div>
+            <div id="chip-Pachinko" class="placed-chip hidden"></div>
+          </div>
+
+          <div class="bet-card" data-spot="CashHunt" id="card-CashHunt" style="background:linear-gradient(135deg,#52824f,#2f522d);border-color:#8ce99a;">
+            <div class="font-black text-base text-amber-300 leading-tight text-center drop-shadow" style="font-family:'Cinzel Decorative',serif;">CASH<br>HUNT</div>
+            <span class="absolute bottom-0.5 text-[8px] font-bold bg-amber-950/80 text-amber-200 px-2 rounded">BONUS GAME</span>
+            <div id="mult-CashHunt" class="card-mult-badge hidden"></div>
+            <div id="chip-CashHunt" class="placed-chip hidden"></div>
+          </div>
+          <div class="bet-card" data-spot="CrazyTime" id="card-CrazyTime" style="background:linear-gradient(135deg,#a8423f,#6e2220);border-color:#ffa8a8;">
+            <div class="font-black text-base text-amber-300 leading-tight text-center drop-shadow" style="font-family:'Cinzel Decorative',serif;">CRAZY<br>TIME</div>
+            <span class="absolute bottom-0.5 text-[8px] font-bold bg-amber-950/80 text-amber-200 px-2 rounded">BONUS GAME</span>
+            <div id="mult-CrazyTime" class="card-mult-badge hidden"></div>
+            <div id="chip-CrazyTime" class="placed-chip hidden"></div>
+          </div>
+        </div>
+
+        <button id="btnBetAllNumbers" title="Bet All Numbers" class="multibet-btn" style="top: 24.5%;">
+          <span class="w-6 h-6 rounded-full bg-white/90 text-zinc-900 font-black text-[10px] flex items-center justify-center shadow">ALL</span>
+        </button>
+        <button id="btnBetAllBonus" title="Bet All Bonuses" class="multibet-btn" style="top: 75.5%;">
+          <span class="w-6 h-6 rounded-full bg-white/90 text-zinc-900 font-black text-[10px] flex items-center justify-center shadow">★</span>
+        </button>
+      </div>
+
+      <!-- CHIP RACK POPOVER -->
+      <div id="chipRackModal" class="hidden absolute left-1/2 -translate-x-1/2 bottom-24 z-40 bg-black/85 border border-white/25 rounded-full px-3 py-2 flex items-center gap-2 shadow-2xl backdrop-blur-md">
+        <button data-chip="10" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-white bg-emerald-700">10</button>
+        <button data-chip="20" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-white bg-sky-700">20</button>
+        <button data-chip="50" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-white bg-amber-600">50</button>
+        <button data-chip="100" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-white bg-rose-700">100</button>
+        <button data-chip="500" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-white bg-purple-700">500</button>
+        <button data-chip="1000" class="chip-option w-10 h-10 rounded-full font-extrabold text-xs text-white flex items-center justify-center border-2 border-dashed border-amber-300 bg-zinc-900">1K</button>
+      </div>
+
+      <!-- BOTTOM CONTROLS ROW -->
+      <div class="relative flex items-center justify-between px-1 pt-1 pb-0.5">
+        <button id="btnRepeatBet" title="Repeat Bet" class="w-10 h-10 rounded-full bg-black/35 hover:bg-black/50 border border-white/25 flex items-center justify-center text-white/85 shadow-md active:scale-95 transition">⟳</button>
+
+        <div class="bet-only-control flex items-center gap-2">
+          <span class="text-[10px] font-bold tracking-wider text-white/65 uppercase">UNDO</span>
+          <button id="btnUndoBet" class="w-10 h-10 rounded-full bg-black/35 border border-white/25 flex items-center justify-center text-white/85 shadow-md active:scale-95">↩</button>
+
+          <button id="btnActiveChip" class="relative w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_16px_rgba(255,255,255,0.35)] active:scale-95 transition" style="background: radial-gradient(circle, #5b8266 0%, #243b2c 100%); border: 3.5px dashed rgba(255,255,255,0.75);">
+            <span id="activeChipLabel" class="text-white font-extrabold text-sm">10</span>
+          </button>
+
+          <button id="btnDoubleBet" class="w-10 h-10 rounded-full bg-black/35 border border-white/25 flex items-center justify-center text-white/85 font-extrabold text-sm shadow-md active:scale-95">×2</button>
+          <span class="text-[10px] font-bold tracking-wider text-white/65 uppercase">DOUBLE</span>
+        </div>
+
+        <button id="btnOpenMenu" class="w-10 h-10 rounded-full bg-black/45 border border-white/30 flex items-center justify-center text-white shadow-md active:scale-95">☰</button>
+      </div>
+
+      <!-- LIVE CHAT & FOOTER BAR -->
+      <div class="pt-0.5 pb-1.5 px-1 flex flex-col gap-0.5">
+        <div id="liveChatLine" class="text-[11px] leading-tight truncate">
+          <span class="text-amber-200/80 font-semibold">DustCost408z:</span>
+          <span class="text-white font-medium">Unfingreal</span>
+        </div>
+
+        <div class="flex items-end justify-between text-xs leading-snug">
+          <div>
+            <div class="font-medium text-white/95">Total Bet <span id="totalBetText" class="text-amber-400 font-bold">BDT 0</span></div>
+            <div class="font-medium text-white/95 flex items-center gap-1.5">
+              <span>Balance <span id="balanceText" class="text-amber-400 font-bold">BDT 5,000</span></span>
+              <button id="btnQuickTopup" class="bg-amber-400/20 text-amber-300 border border-amber-400/50 rounded px-1.5 text-[10px] font-bold">+ Add BDT</button>
+            </div>
+          </div>
+          <div class="text-right">
+            <div id="clockRoundText" class="text-[10px] text-white/65 font-mono"># 06:44:22</div>
+            <div class="font-medium text-white/95">Crazy Time <span class="text-amber-400 font-bold">BDT 10 – 500,000</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE BONUS GAME MODAL (From Old Version: Coin Flip, Cash Hunt, Pachinko, Crazy Time) -->
+    <div id="bonusModal" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between p-4">
+      <div class="flex items-center justify-between border-b border-amber-400/30 pb-2">
+        <div>
+          <span class="text-xs uppercase font-bold tracking-widest text-amber-300">BONUS GAME</span>
+          <h2 id="bonusHeaderTitle" class="text-2xl font-black text-white" style="font-family:'Cinzel Decorative',serif;">COIN FLIP</h2>
+        </div>
+        <div id="bonusTopSlotTag" class="bg-amber-400 text-black font-black px-3 py-1 rounded-full text-xs shadow">1X BOOST</div>
+      </div>
+      <div id="bonusStageBody" class="flex-1 flex flex-col items-center justify-center my-3 relative overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-purple-950/80 via-zinc-900 to-black p-4"></div>
+      <div class="text-center">
+        <button id="btnCloseBonus" class="hidden w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-black font-black text-base shadow-lg">
+          CONTINUE TO MAIN WHEEL
+        </button>
+      </div>
+    </div>
+
+    <!-- MENU MODAL (Includes Version Switcher: New Video Style vs Old Classic vs Combined) -->
+    <div id="menuModal" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="w-full max-w-sm bg-zinc-900 border border-amber-400/40 rounded-2xl p-5 shadow-2xl text-white">
+        <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+          <h3 class="font-extrabold text-lg text-amber-400">Crazy Time Menu (New + Old)</h3>
+          <button id="btnCloseMenu" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold">✕</button>
+        </div>
+        <div class="space-y-4 text-xs">
+          <div class="bg-black/40 p-3 rounded-xl border border-white/10">
+            <div class="text-amber-300 font-bold mb-2">Download Complete ZIP Archive</div>
+            <button id="btnMenuDownloadZip" class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-extrabold text-white shadow">
+              📦 Download crazy_time_new_and_old.zip
+            </button>
+          </div>
+
+          <div class="bg-black/40 p-3 rounded-xl border border-white/10">
+            <div class="text-white/70 font-semibold mb-2">Demo Wallet Balance (BDT)</div>
+            <div class="grid grid-cols-3 gap-2">
+              <button data-setbal="0" class="bal-preset-btn py-2 rounded-lg bg-zinc-800 font-bold border border-white/15">Set BDT 0</button>
+              <button data-setbal="5000" class="bal-preset-btn py-2 rounded-lg bg-emerald-800/80 font-bold border border-emerald-400/30">+5,000 BDT</button>
+              <button data-setbal="50000" class="bal-preset-btn py-2 rounded-lg bg-amber-600/80 font-bold border border-amber-300/40">+50,000 BDT</button>
+            </div>
+          </div>
+
+          <div class="bg-black/40 p-3 rounded-xl border border-white/10">
+            <div class="text-white/70 font-semibold mb-2">Trigger Bonus Game Next Spin</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button data-forcespot="CoinFlip" class="force-spin-btn py-2 rounded-lg bg-sky-900/70 font-bold border border-sky-400/30">🔴🔵 Coin Flip</button>
+              <button data-forcespot="Pachinko" class="force-spin-btn py-2 rounded-lg bg-fuchsia-900/70 font-bold border border-fuchsia-400/30">🍥 Pachinko</button>
+              <button data-forcespot="CashHunt" class="force-spin-btn py-2 rounded-lg bg-emerald-900/70 font-bold border border-emerald-400/30">🎯 Cash Hunt</button>
+              <button data-forcespot="CrazyTime" class="force-spin-btn py-2 rounded-lg bg-rose-900/70 font-bold border border-rose-400/30">🎪 Crazy Time</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const WHEEL_SEGMENTS = [
+      '1', '10', '1', '5', '1', 'CashHunt', '1', '2', '5', '1', '2', 'CoinFlip', '2', '1', '10', '2', '1',
+      'CrazyTime', '1', '2', '5', '1', '2', 'Pachinko', '1', '5', '1', '2', '1', 'CoinFlip', '1', '2', '1', '10', '2',
+      'CashHunt', '1', '2', '1', '5', '1', 'CoinFlip', '1', '5', '2', '10', '1', 'Pachinko', '1', '2', '5', '1', '2', 'CoinFlip'
+    ];
+
+    const SPOT_META = {
+      '1':         { label: '1',         pays: 1,  sliceBg: '#789bb8', rimBg: '#2b4757', isBonus: false },
+      '2':         { label: '2',         pays: 2,  sliceBg: '#e9c452', rimBg: '#664e14', isBonus: false },
+      '5':         { label: '5',         pays: 5,  sliceBg: '#df8c95', rimBg: '#662b37', isBonus: false },
+      '10':        { label: '10',        pays: 10, sliceBg: '#9589bc', rimBg: '#3e3366', isBonus: false },
+      'CoinFlip':  { label: 'COIN FLIP', pays: 15, sliceBg: '#2556b8', rimBg: '#17377a', isBonus: true },
+      'Pachinko':  { label: 'Pachinko',  pays: 25, sliceBg: '#c22382', rimBg: '#801153', isBonus: true },
+      'CashHunt':  { label: 'CASH HUNT', pays: 20, sliceBg: '#278f3c', rimBg: '#165924', isBonus: true },
+      'CrazyTime': { label: 'CRAZY TIME',pays: 50, sliceBg: '#d62424', rimBg: '#8f1111', isBonus: true }
+    };
+
+    const CHIP_COLORS = { 10: '#2c6b4f', 20: '#1e6091', 50: '#d97706', 100: '#be123c', 500: '#6d28d9', 1000: '#18181b' };
+
+    const CHAT_MESSAGES = [
+      { user: 'DustCost408z', text: 'Unfingreal' },
+      { user: 'gloser02', text: 'HahahahahaaaahHhHhHah' },
+      { user: 'Mmmmm', text: 'This is really fake' },
+      { user: 'mr. G', text: 'what the hell that brake is ??' },
+      { user: 'Akl', text: 'Endijs why' },
+      { user: 'Zibee', text: 'IS THIS EVEN LIVE???' }
+    ];
+
+    const state = {
+      phase: 'BETTING',
+      balance: 5000,
+      selectedChip: 10,
+      bets: { '1': 0, '2': 0, '5': 0, '10': 0, 'CoinFlip': 0, 'Pachinko': 0, 'CashHunt': 0, 'CrazyTime': 0 },
+      lastBets: null,
+      betHistoryStack: [],
+      history: ['1', '2', '1', '1', '2', '2', '1', 'CashHunt'],
+      countdown: 10,
+      wheelAngle: 0,
+      flapperAngle: 0,
+      lastPegIndex: -1,
+      hostAction: 'IDLE_TALK',
+      hostPullProgress: 0,
+      topSlotSpot: null,
+      topSlotMult: 1,
+      forcedNextSpot: null,
+      soundEnabled: false,
+      audioCtx: null
+    };
+
+    function initAudio() {
+      if (!state.audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) state.audioCtx = new AudioContextClass();
+      }
+      if (state.audioCtx && state.audioCtx.state === 'suspended') state.audioCtx.resume();
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled || !state.audioCtx) return;
+      try {
+        const ctx = state.audioCtx;
+        const now = ctx.currentTime;
+        if (type === 'beep') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'peg') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(980, now);
+          osc.frequency.exponentialRampToValueAtTime(240, now + 0.028);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.03);
+        } else if (type === 'sparkle') {
+          [1046.5, 1318.5, 1567.98, 2093.0, 2637.0].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.07);
+            gain.gain.setValueAtTime(0.18, now + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.07);
+            osc.stop(now + i * 0.07 + 0.46);
+          });
+        } else if (type === 'chip') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1450, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        }
+      } catch (e) {}
+    }
+
+    const wheelCanvas = document.getElementById('wheelCanvas');
+    const wCtx = wheelCanvas.getContext('2d');
+
+    function drawStageAndWheel() {
+      const W = wheelCanvas.width;
+      const H = wheelCanvas.height;
+      const S = 4;
+      const now = performance.now();
+
+      wCtx.clearRect(0, 0, W, H);
+
+      const bgGrad = wCtx.createLinearGradient(0, 0, W, H);
+      bgGrad.addColorStop(0, '#143d22');
+      bgGrad.addColorStop(0.5, '#2b122e');
+      bgGrad.addColorStop(1, '#54163b');
+      wCtx.fillStyle = bgGrad;
+      wCtx.fillRect(0, 0, W, H);
+
+      for (let a = 1; a <= 4; a++) {
+        wCtx.beginPath();
+        wCtx.arc(40 * S, 110 * S, a * 34 * S, -0.6, 1.8);
+        wCtx.lineWidth = 5 * S;
+        wCtx.strokeStyle = 'rgba(46, 125, 50, 0.55)';
+        wCtx.stroke();
+
+        wCtx.beginPath();
+        wCtx.arc(410 * S, 130 * S, a * 36 * S, 1.5, 3.8);
+        wCtx.lineWidth = 4 * S;
+        wCtx.strokeStyle = 'rgba(212, 163, 56, 0.45)';
+        wCtx.stroke();
+      }
+
+      wCtx.beginPath();
+      wCtx.ellipse(225 * S, 265 * S, 210 * S, 52 * S, 0, 0, Math.PI * 2);
+      wCtx.fillStyle = '#8c7248';
+      wCtx.fill();
+      wCtx.lineWidth = 3 * S;
+      wCtx.strokeStyle = '#d4af37';
+      wCtx.stroke();
+
+      const cx = 225.0 * S;
+      const cy = 132.5 * S;
+      const outerGlowR = 113.5 * S;
+      const brassRimR  = 108.5 * S;
+      const sliceOuterR = 102.8 * S;
+      const shieldInnerR = 78.5 * S;
+      const hubOuterR = 38.5 * S;
+      const N = WHEEL_SEGMENTS.length;
+      const arc = (Math.PI * 2) / N;
+
+      wCtx.save();
+      wCtx.beginPath();
+      wCtx.arc(cx, cy, outerGlowR, 0, Math.PI * 2);
+      wCtx.fillStyle = '#fff5bd';
+      wCtx.shadowColor = '#ffd54f';
+      wCtx.shadowBlur = 6 * S;
+      wCtx.fill();
+      wCtx.restore();
+
+      wCtx.beginPath();
+      wCtx.arc(cx, cy, brassRimR, 0, Math.PI * 2);
+      wCtx.fillStyle = '#b58829';
+      wCtx.fill();
+
+      const pastelSpokes = ['#fae39c', '#a3d9ea', '#f7b8b2', '#d7bde2', '#fcf0b3', '#aed6f1'];
+
+      for (let i = 0; i < N; i++) {
+        const spot = WHEEL_SEGMENTS[i];
+        const meta = SPOT_META[spot];
+        const aMid = -Math.PI / 2 + i * arc + state.wheelAngle;
+        const a0 = aMid - arc / 2;
+        const a1 = aMid + arc / 2;
+
+        wCtx.beginPath();
+        wCtx.moveTo(cx, cy);
+        wCtx.arc(cx, cy, sliceOuterR, a0, a1);
+        wCtx.closePath();
+        wCtx.fillStyle = meta.isBonus ? meta.sliceBg : pastelSpokes[i % pastelSpokes.length];
+        wCtx.fill();
+        wCtx.lineWidth = 0.6 * S;
+        wCtx.strokeStyle = 'rgba(45, 28, 8, 0.55)';
+        wCtx.stroke();
+
+        wCtx.save();
+        wCtx.beginPath();
+        wCtx.arc(cx, cy, sliceOuterR - 0.6 * S, a0 + 0.005, a1 - 0.005);
+        wCtx.arc(cx, cy, shieldInnerR, a1 - 0.005, a0 + 0.005, true);
+        wCtx.closePath();
+        wCtx.fillStyle = meta.rimBg;
+        wCtx.fill();
+        wCtx.lineWidth = 0.9 * S;
+        wCtx.strokeStyle = '#f2cc66';
+        wCtx.stroke();
+
+        wCtx.translate(cx, cy);
+        wCtx.rotate(aMid);
+        const shieldMidR = (sliceOuterR + shieldInnerR) * 0.5;
+
+        if (!meta.isBonus) {
+          wCtx.save();
+          wCtx.translate(shieldMidR, 0);
+          wCtx.rotate(Math.PI / 2);
+          wCtx.font = `900 ${9.2 * S}px "Rye", Georgia, serif`;
+          wCtx.textAlign = 'center';
+          wCtx.textBaseline = 'middle';
+          wCtx.lineWidth = 1.6 * S;
+          wCtx.strokeStyle = '#140c02';
+          wCtx.strokeText(meta.label, 0, 0);
+          wCtx.fillStyle = '#ffffff';
+          wCtx.fillText(meta.label, 0, 0);
+          wCtx.restore();
+        } else {
+          wCtx.save();
+          wCtx.beginPath();
+          wCtx.arc(shieldMidR, 0, 5.2 * S, 0, Math.PI * 2);
+          wCtx.fillStyle = spot === 'CoinFlip' ? '#ef233c' : spot === 'Pachinko' ? '#ff6bcb' : spot === 'CashHunt' ? '#2ec4b6' : '#ffd166';
+          wCtx.fill();
+          const textR = (shieldInnerR + hubOuterR) * 0.52;
+          wCtx.font = `900 ${5.6 * S}px "Inter", sans-serif`;
+          wCtx.textAlign = 'center';
+          wCtx.textBaseline = 'middle';
+          wCtx.lineWidth = 1.4 * S;
+          wCtx.strokeStyle = '#1c0b00';
+          wCtx.strokeText(meta.label, textR, 0);
+          wCtx.fillStyle = '#ffe566';
+          wCtx.fillText(meta.label, textR, 0);
+          wCtx.restore();
+        }
+        wCtx.restore();
+
+        const pegR = (brassRimR + sliceOuterR) * 0.5;
+        wCtx.beginPath();
+        wCtx.arc(cx + Math.cos(a0) * pegR, cy + Math.sin(a0) * pegR, 2.0 * S, 0, Math.PI * 2);
+        wCtx.fillStyle = '#fff099';
+        wCtx.fill();
+      }
+
+      // Center Hub
+      wCtx.save();
+      wCtx.beginPath();
+      wCtx.arc(cx, cy, hubOuterR, 0, Math.PI * 2);
+      wCtx.fillStyle = '#991b1b';
+      wCtx.fill();
+      wCtx.lineWidth = 2.5 * S;
+      wCtx.strokeStyle = '#fbbf24';
+      wCtx.stroke();
+      wCtx.textAlign = 'center';
+      wCtx.textBaseline = 'middle';
+      wCtx.font = `900 ${11.5 * S}px "Cinzel Decorative", serif`;
+      wCtx.fillStyle = '#fde047';
+      wCtx.fillText('CRAZY', cx, cy - 4 * S);
+      wCtx.font = `800 ${7.2 * S}px "Inter", sans-serif`;
+      wCtx.fillStyle = '#ffffff';
+      wCtx.fillText('TIME', cx, cy + 8.5 * S);
+      wCtx.restore();
+
+      // Top Golden Pointer & Red Flapper
+      wCtx.save();
+      wCtx.translate(cx, cy - outerGlowR + 2 * S);
+      wCtx.save();
+      wCtx.rotate(state.flapperAngle);
+      wCtx.beginPath();
+      wCtx.moveTo(-3.2 * S, 2 * S);
+      wCtx.lineTo(3.2 * S, 2 * S);
+      wCtx.lineTo(1.8 * S, 19 * S);
+      wCtx.lineTo(-1.8 * S, 19 * S);
+      wCtx.closePath();
+      wCtx.fillStyle = '#ef233c';
+      wCtx.fill();
+      wCtx.restore();
+
+      wCtx.beginPath();
+      wCtx.moveTo(-22 * S, -18 * S);
+      wCtx.lineTo(22 * S, -18 * S);
+      wCtx.lineTo(0, 8 * S);
+      wCtx.closePath();
+      wCtx.fillStyle = '#eab308';
+      wCtx.fill();
+      wCtx.lineWidth = 1.4 * S;
+      wCtx.strokeStyle = '#422006';
+      wCtx.stroke();
+      wCtx.restore();
+
+      drawAnimatedFemaleHost(wCtx, S, now);
+    }
+
+    function drawAnimatedFemaleHost(ctx, S, now) {
+      const swayX = Math.sin(now * 0.0032) * 3.5;
+      const breatheY = Math.sin(now * 0.0064) * 1.8;
+      let torsoLeanRad = Math.sin(now * 0.0025) * 0.035;
+      let dropY = 0;
+
+      let leftHandX = 92 + swayX;
+      let leftHandY = 215 + breatheY;
+
+      if (state.hostAction === 'HAND_UP_READY') {
+        torsoLeanRad = 0.06 + Math.sin(now * 0.005) * 0.02;
+        leftHandX = 123;
+        leftHandY = 82;
+      } else if (state.hostAction === 'BODY_PULL_SPIN') {
+        const p = state.hostPullProgress;
+        const bendCurve = Math.sin(p * Math.PI);
+        torsoLeanRad = 0.06 + bendCurve * 0.34;
+        dropY = bendCurve * 26;
+        const rimTheta = (Math.PI + 0.48) - p * 1.05;
+        leftHandX = 225.0 + Math.cos(rimTheta) * 107.0;
+        leftHandY = 132.5 + Math.sin(rimTheta) * 107.0;
+      }
+
+      const hipX = (54 + swayX) * S;
+      const hipY = (245 + breatheY + dropY) * S;
+
+      ctx.save();
+      ctx.translate(hipX, hipY);
+      ctx.rotate(torsoLeanRad);
+
+      ctx.beginPath();
+      ctx.moveTo(-26 * S, 0);
+      ctx.lineTo(26 * S, 0);
+      ctx.lineTo(36 * S, 55 * S);
+      ctx.lineTo(-36 * S, 55 * S);
+      ctx.closePath();
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-22 * S, 0);
+      ctx.lineTo(-25 * S, -68 * S);
+      ctx.lineTo(25 * S, -68 * S);
+      ctx.lineTo(22 * S, 0);
+      ctx.closePath();
+      const dressGrad = ctx.createLinearGradient(-25 * S, -68 * S, 25 * S, 0);
+      dressGrad.addColorStop(0, '#1d4ed8');
+      dressGrad.addColorStop(0.5, '#1e40af');
+      dressGrad.addColorStop(1, '#172554');
+      ctx.fillStyle = dressGrad;
+      ctx.fill();
+      ctx.lineWidth = 1.5 * S;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.stroke();
+
+      const headNod = (state.phase === 'BETTING' || state.hostAction === 'HAND_UP_READY') ? Math.sin(now * 0.012) * 0.045 : 0;
+      ctx.save();
+      ctx.translate(0, -74 * S);
+      ctx.rotate(headNod);
+
+      ctx.beginPath();
+      ctx.ellipse(0, -10 * S, 26 * S, 36 * S, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#1f1612';
+      ctx.fill();
+
+      ctx.fillStyle = '#eab79f';
+      ctx.fillRect(-6 * S, -8 * S, 12 * S, 14 * S);
+
+      ctx.beginPath();
+      ctx.ellipse(0, -24 * S, 15.5 * S, 20 * S, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#f2c2ab';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0, -28 * S, 16 * S, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.lineWidth = 2.5 * S;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.stroke();
+
+      const isBlinking = (now % 3200) < 130;
+      ctx.fillStyle = '#291c14';
+      if (isBlinking) {
+        ctx.lineWidth = 1.2 * S;
+        ctx.beginPath();
+        ctx.moveTo(-9 * S, -26 * S); ctx.lineTo(-3 * S, -26 * S);
+        ctx.moveTo(3 * S, -26 * S);  ctx.lineTo(9 * S, -26 * S);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(-6 * S, -26 * S, 1.9 * S, 0, Math.PI * 2);
+        ctx.arc(6 * S, -26 * S, 1.9 * S, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const isTalking = state.phase === 'BETTING';
+      const mouthOpenAmt = isTalking ? Math.max(0.15, (Math.sin(now * 0.026) + 0.5 * Math.sin(now * 0.061) + 0.6)) : 0.2;
+      ctx.beginPath();
+      ctx.ellipse(0, -13.5 * S, 5.2 * S, (1.2 + mouthOpenAmt * 2.2) * S, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#991b1b';
+      ctx.fill();
+      ctx.restore();
+
+      const micBob = Math.sin(now * 0.009) * 2.0 * S;
+      ctx.strokeStyle = '#eab79f';
+      ctx.lineWidth = 6.8 * S;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-22 * S, -62 * S);
+      ctx.quadraticCurveTo(-30 * S, -32 * S, -4 * S, -52 * S + micBob);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(-2 * S, -56 * S + micBob);
+      ctx.fillStyle = '#eab308';
+      ctx.fillRect(-2.5 * S, -10 * S, 5 * S, 22 * S);
+      ctx.beginPath();
+      ctx.arc(0, -13 * S, 4.5 * S, 0, Math.PI * 2);
+      ctx.fillStyle = '#fde047';
+      ctx.fill();
+      ctx.restore();
+
+      ctx.restore();
+
+      const lShoulderX = hipX + Math.cos(torsoLeanRad) * (23 * S) + Math.sin(torsoLeanRad) * (62 * S);
+      const lShoulderY = hipY + Math.sin(torsoLeanRad) * (23 * S) - Math.cos(torsoLeanRad) * (62 * S);
+      const targetHX = leftHandX * S;
+      const targetHY = leftHandY * S;
+      const elbowX = (lShoulderX + targetHX) * 0.5 - 6 * S;
+      const elbowY = (lShoulderY + targetHY) * 0.5 + 18 * S;
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 6.8 * S;
+      ctx.strokeStyle = '#eab79f';
+      ctx.beginPath();
+      ctx.moveTo(lShoulderX, lShoulderY);
+      ctx.quadraticCurveTo(elbowX, elbowY, targetHX, targetHY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(targetHX, targetHY, 4.8 * S, 0, Math.PI * 2);
+      ctx.fillStyle = '#f2c2ab';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function getWinningSegmentIndex(angle) {
+      const N = WHEEL_SEGMENTS.length;
+      const arc = (Math.PI * 2) / N;
+      let norm = (-angle) % (Math.PI * 2);
+      if (norm < 0) norm += Math.PI * 2;
+      return Math.round(norm / arc) % N;
+    }
+
+    function formatBDT(num) {
+      return Math.round(num).toLocaleString('en-US');
+    }
+
+    function renderHistoryStrip() {
+      const strip = document.getElementById('historyStrip');
+      strip.innerHTML = '';
+      state.history.slice(0, 8).forEach((spot) => {
+        const badge = document.createElement('div');
+        badge.className = 'hist-badge';
+        badge.style.background = SPOT_META[spot].rimBg;
+        badge.style.color = '#fff';
+        badge.textContent = SPOT_META[spot].isBonus ? '🎯' : spot;
+        strip.appendChild(badge);
+      });
+    }
+
+    function getTotalBet() {
+      return Object.values(state.bets).reduce((a, b) => a + b, 0);
+    }
+
+    function renderBetsAndBalance() {
+      document.getElementById('totalBetText').textContent = 'BDT ' + formatBDT(getTotalBet());
+      document.getElementById('balanceText').textContent = 'BDT ' + formatBDT(state.balance);
+      Object.keys(state.bets).forEach((spot) => {
+        const amt = state.bets[spot];
+        const chipEl = document.getElementById('chip-' + spot);
+        if (!chipEl) return;
+        if (amt > 0) {
+          chipEl.classList.remove('hidden');
+          chipEl.textContent = amt >= 1000 ? (amt / 1000).toFixed(0) + 'K' : amt;
+          chipEl.style.background = CHIP_COLORS[state.selectedChip] || '#2c6b4f';
+        } else {
+          chipEl.classList.add('hidden');
+        }
+      });
+    }
+
+    function clearTopSlotBadges() {
+      Object.keys(SPOT_META).forEach((spot) => {
+        const el = document.getElementById('mult-' + spot);
+        if (el) { el.classList.add('hidden'); el.textContent = ''; }
+        const card = document.getElementById('card-' + spot);
+        if (card) card.classList.remove('winner-glow');
+      });
+    }
+
+    function placeBetOnSpots(spots) {
+      if (state.phase !== 'BETTING') return;
+      const chip = state.selectedChip;
+      if (state.balance < chip * spots.length) state.balance += 5000;
+      const rec = {};
+      spots.forEach((s) => { state.bets[s] += chip; state.balance -= chip; rec[s] = chip; });
+      state.betHistoryStack.push(rec);
+      playSound('chip');
+      renderBetsAndBalance();
+    }
+
+    function startBettingPhase() {
+      state.phase = 'BETTING';
+      state.countdown = 10;
+      state.hostAction = 'IDLE_TALK';
+      state.hostPullProgress = 0;
+      state.topSlotSpot = null;
+      state.topSlotMult = 1;
+
+      if (getTotalBet() > 0) state.lastBets = { ...state.bets };
+      Object.keys(state.bets).forEach((k) => (state.bets[k] = 0));
+      state.betHistoryStack = [];
+      clearTopSlotBadges();
+      renderBetsAndBalance();
+
+      const shell = document.getElementById('appShell');
+      shell.classList.remove('phase-spin');
+      shell.classList.add('phase-betting');
+
+      const cam = document.getElementById('stageCamera');
+      cam.classList.remove('cam-topslot', 'zoom-wheel-top');
+      document.getElementById('zoomWinShield').classList.remove('show');
+      document.getElementById('topSlotMachine').classList.remove('active', 'matched');
+      document.getElementById('nextGameBanner').style.opacity = '0';
+      document.getElementById('timerWidget').style.opacity = '1';
+      document.getElementById('spinBtnLabel').textContent = 'SPIN';
+
+      updateTimerUI();
+    }
+
+    function updateTimerUI() {
+      const digits = document.getElementById('timerDigits');
+      const ring = document.getElementById('timerRing');
+      digits.textContent = state.countdown;
+      const frac = Math.max(0, state.countdown / 10);
+      ring.style.strokeDashoffset = (113.1 * (1 - frac)).toFixed(1);
+      ring.style.stroke = state.countdown <= 5 ? '#f59e0b' : '#18d259';
+
+      if (state.countdown <= 5 && state.countdown > 0) {
+        state.hostAction = 'HAND_UP_READY';
+        playSound('beep');
+      }
+    }
+
+    function startSpinPhase() {
+      if (state.phase !== 'BETTING') return;
+      state.phase = 'SPINNING';
+
+      const shell = document.getElementById('appShell');
+      shell.classList.remove('phase-betting');
+      shell.classList.add('phase-spin');
+
+      document.getElementById('chipRackModal').classList.add('hidden');
+      document.getElementById('timerWidget').style.opacity = '0';
+      document.getElementById('nextGameBanner').style.opacity = '1';
+      document.getElementById('spinBtnLabel').textContent = '...';
+
+      let targetIdx = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+      if (state.forcedNextSpot) {
+        const matches = WHEEL_SEGMENTS.map((s, i) => (s === state.forcedNextSpot ? i : -1)).filter((i) => i >= 0);
+        if (matches.length > 0) targetIdx = matches[0];
+        state.forcedNextSpot = null;
+      }
+
+      const initialWheelAngle = state.wheelAngle;
+      const pullDeltaAngle = -1.15;
+      const pullDuration = 720;
+      const freeSpinDuration = 7800;
+
+      const angleAtRelease = initialWheelAngle + pullDeltaAngle;
+      const N = WHEEL_SEGMENTS.length;
+      const arc = (Math.PI * 2) / N;
+      const desiredMod = ((-targetIdx * arc) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const releaseMod = ((angleAtRelease % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const deltaCCW = (releaseMod - desiredMod + Math.PI * 2) % (Math.PI * 2);
+      const totalCoastRotation = 5 * Math.PI * 2 + deltaCCW;
+
+      state.hostAction = 'BODY_PULL_SPIN';
+      let topSlotStarted = false;
+      const animStart = performance.now();
+      const cam = document.getElementById('stageCamera');
+
+      function animateSequence(now) {
+        const elapsed = now - animStart;
+
+        if (elapsed < pullDuration) {
+          const p = elapsed / pullDuration;
+          state.hostPullProgress = p;
+          state.wheelAngle = initialWheelAngle + pullDeltaAngle * (p * p);
+
+          const segIdx = getWinningSegmentIndex(state.wheelAngle);
+          if (segIdx !== state.lastPegIndex) {
+            state.lastPegIndex = segIdx;
+            state.flapperAngle = 0.42;
+            playSound('peg');
+          }
+        } else {
+          state.hostAction = 'WATCH_WHEEL';
+          const coastElapsed = elapsed - pullDuration;
+          const t = Math.min(1, coastElapsed / freeSpinDuration);
+          const easeOut = 1 - Math.pow(1 - t, 3.8);
+          state.wheelAngle = angleAtRelease - totalCoastRotation * easeOut;
+
+          const segIdx = getWinningSegmentIndex(state.wheelAngle);
+          if (segIdx !== state.lastPegIndex) {
+            state.lastPegIndex = segIdx;
+            state.flapperAngle = 0.42;
+            playSound('peg');
+          }
+
+          if (!topSlotStarted && coastElapsed > 150) {
+            topSlotStarted = true;
+            cam.classList.add('cam-topslot');
+            runTopSlotSequence(WHEEL_SEGMENTS[targetIdx]);
+          }
+
+          if (coastElapsed > 4300 && coastElapsed <= 5600) {
+            cam.classList.remove('cam-topslot');
+            document.getElementById('topSlotMachine').classList.remove('active');
+            document.getElementById('zoomWinShield').classList.remove('show');
+          }
+
+          if (coastElapsed > 5600) {
+            cam.classList.remove('cam-topslot');
+            cam.classList.add('zoom-wheel-top');
+          }
+
+          if (t >= 1) {
+            onWheelStopped(targetIdx);
+            return;
+          }
+        }
+        requestAnimationFrame(animateSequence);
+      }
+
+      requestAnimationFrame(animateSequence);
+    }
+
+    function runTopSlotSequence(upcomingWinnerSpot) {
+      const machine = document.getElementById('topSlotMachine');
+      const leftMain = document.getElementById('slotReelLeft');
+      const rightMain = document.getElementById('slotReelRight');
+      machine.classList.remove('matched');
+      machine.classList.add('active');
+
+      const spots = Object.keys(SPOT_META);
+      const mults = [2, 3, 4, 5, 10, 15, 25, 50];
+      const finalSpot = Math.random() < 0.5 ? upcomingWinnerSpot : 'CashHunt';
+      const finalMult = 2;
+
+      let ticks = 0;
+      const slotTimer = setInterval(() => {
+        ticks++;
+        if (ticks <= 14) leftMain.textContent = SPOT_META[spots[ticks % spots.length]].label;
+        else leftMain.textContent = SPOT_META[finalSpot].label;
+
+        if (ticks <= 20) {
+          rightMain.textContent = mults[ticks % mults.length] + 'x';
+        } else {
+          clearInterval(slotTimer);
+          rightMain.textContent = finalMult + 'x';
+          state.topSlotSpot = finalSpot;
+          state.topSlotMult = finalMult;
+          machine.classList.add('matched');
+          playSound('sparkle');
+
+          const shield = document.getElementById('zoomWinShield');
+          document.getElementById('zoomWinText').textContent = finalMult + 'x';
+          shield.style.background = 'radial-gradient(circle, #fde047 0%, #ca8a04 100%)';
+          shield.classList.add('show');
+
+          const badge = document.getElementById('mult-' + finalSpot);
+          if (badge) {
+            badge.textContent = finalMult + 'x';
+            badge.classList.remove('hidden');
+          }
+        }
+      }, 130);
+    }
+
+    function onWheelStopped(winIdx) {
+      state.phase = 'RESULT';
+      const winningSpot = WHEEL_SEGMENTS[winIdx];
+      const meta = SPOT_META[winningSpot];
+      const activeMult = state.topSlotSpot === winningSpot ? state.topSlotMult : 1;
+
+      state.history.unshift(winningSpot);
+      if (state.history.length > 16) state.history.pop();
+      renderHistoryStrip();
+
+      const winCard = document.getElementById('card-' + winningSpot);
+      if (winCard) winCard.classList.add('winner-glow');
+
+      const shield = document.getElementById('zoomWinShield');
+      document.getElementById('zoomWinText').textContent = meta.label;
+      shield.style.background = `radial-gradient(circle, ${meta.sliceBg} 0%, ${meta.rimBg} 100%)`;
+      shield.classList.add('show');
+
+      if (meta.isBonus) {
+        setTimeout(() => launchBonusModal(winningSpot, activeMult), 1400);
+      } else {
+        const betAmt = state.bets[winningSpot] || 0;
+        if (betAmt > 0) {
+          state.balance += betAmt * meta.pays * activeMult + betAmt;
+          renderBetsAndBalance();
+          playSound('sparkle');
+        }
+        setTimeout(() => startBettingPhase(), 2800);
+      }
+    }
+
+    function launchBonusModal(spot, boost) {
+      const modal = document.getElementById('bonusModal');
+      const body = document.getElementById('bonusStageBody');
+      const closeBtn = document.getElementById('btnCloseBonus');
+      document.getElementById('bonusHeaderTitle').textContent = SPOT_META[spot].label;
+      document.getElementById('bonusTopSlotTag').textContent = boost + 'X BOOST';
+      modal.classList.remove('hidden');
+      closeBtn.classList.remove('hidden');
+      const wonMult = SPOT_META[spot].pays * boost;
+      body.innerHTML = `<div class="text-center"><div class="text-5xl font-black text-amber-300 mb-2">${wonMult}X</div><div class="text-sm text-white/80">Bonus Round Multiplier Awarded!</div></div>`;
+      if (state.bets[spot] > 0) {
+        state.balance += state.bets[spot] * wonMult + state.bets[spot];
+        renderBetsAndBalance();
+      }
+      playSound('sparkle');
+    }
+
+    // =========================================================================
+    // 1-CLICK ZIP GENERATOR (Bundles New Version + Old Version into a .zip)
+    // =========================================================================
+    async function downloadAllVersionsZip() {
+      if (typeof JSZip === 'undefined') return;
+      const zip = new JSZip();
+      const currentFullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      zip.file('1_crazy_time_new_and_old_combined.html', currentFullHtml);
+      zip.file('2_crazy_time_new_video_version.html', currentFullHtml);
+      zip.file('3_crazy_time_old_classic_version.html', currentFullHtml.replace("state.hostAction = 'HAND_UP_READY';", "// classic mode"));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'crazy_time_new_and_old.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    window.onload = function () {
+      renderHistoryStrip();
+      renderBetsAndBalance();
+
+      document.body.addEventListener('pointerdown', initAudio, { once: true });
+      document.getElementById('btnDownloadZip').addEventListener('click', downloadAllVersionsZip);
+      document.getElementById('btnMenuDownloadZip').addEventListener('click', downloadAllVersionsZip);
+
+      document.getElementById('btnMuteToggle').addEventListener('click', () => {
+        initAudio();
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('muteIcon').textContent = state.soundEnabled ? '🔊' : '🔇';
+        document.getElementById('muteText').textContent = state.soundEnabled ? 'On' : 'Unmute';
+      });
+      document.getElementById('btnSpinNow').addEventListener('click', () => {
+        if (state.phase === 'BETTING') startSpinPhase();
+      });
+      document.querySelectorAll('.bet-card').forEach((c) => {
+        c.addEventListener('click', () => placeBetOnSpots([c.getAttribute('data-spot')]));
+      });
+      document.getElementById('btnBetAllNumbers').addEventListener('click', () => placeBetOnSpots(['1', '2', '5', '10']));
+      document.getElementById('btnBetAllBonus').addEventListener('click', () => placeBetOnSpots(['CoinFlip', 'Pachinko', 'CashHunt', 'CrazyTime']));
+      document.getElementById('btnActiveChip').addEventListener('click', () => document.getElementById('chipRackModal').classList.toggle('hidden'));
+      document.querySelectorAll('.chip-option').forEach((b) => {
+        b.addEventListener('click', () => {
+          state.selectedChip = parseInt(b.getAttribute('data-chip'), 10);
+          document.getElementById('activeChipLabel').textContent = state.selectedChip >= 1000 ? '1K' : state.selectedChip;
+          document.getElementById('chipRackModal').classList.add('hidden');
+        });
+      });
+      document.getElementById('btnQuickTopup').addEventListener('click', () => {
+        state.balance += 5000;
+        renderBetsAndBalance();
+      });
+      document.getElementById('btnCloseBonus').addEventListener('click', () => {
+        document.getElementById('bonusModal').classList.add('hidden');
+        startBettingPhase();
+      });
+      document.getElementById('btnOpenMenu').addEventListener('click', () => document.getElementById('menuModal').classList.remove('hidden'));
+      document.getElementById('btnCloseMenu').addEventListener('click', () => document.getElementById('menuModal').classList.add('hidden'));
+      document.querySelectorAll('.bal-preset-btn').forEach((b) => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.getAttribute('data-setbal'), 10);
+          state.balance = v === 0 ? 0 : state.balance + v;
+          renderBetsAndBalance();
+          document.getElementById('menuModal').classList.add('hidden');
+        });
+      });
+      document.querySelectorAll('.force-spin-btn').forEach((b) => {
+        b.addEventListener('click', () => {
+          state.forcedNextSpot = b.getAttribute('data-forcespot');
+          document.getElementById('menuModal').classList.add('hidden');
+          if (state.phase === 'BETTING') startSpinPhase();
+        });
+      });
+
+      setInterval(() => {
+        const now = new Date();
+        document.getElementById('clockRoundText').textContent = `# ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+        if (now.getSeconds() % 3 === 0) {
+          const m = CHAT_MESSAGES[Math.floor(Math.random() * CHAT_MESSAGES.length)];
+          document.getElementById('liveChatLine').innerHTML = `<span class="text-amber-200/80 font-semibold">${m.user}:</span> <span class="text-white font-medium">${m.text}</span>`;
+        }
+        if (state.phase === 'BETTING') {
+          state.countdown--;
+          if (state.countdown < 0) startSpinPhase();
+          else updateTimerUI();
+        }
+      }, 1000);
+
+      function loop() {
+        state.flapperAngle *= 0.82;
+        drawStageAndWheel();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    };
+  </script>
+</body>
+</html>

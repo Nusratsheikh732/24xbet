@@ -1,0 +1,81 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": false
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true)"
+      }
+    },
+    "game_settings": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+    },
+    "support": {
+      "messages": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true)",
+          "$msgId": {
+            ".write": "auth != null && ((auth.uid == $uid && newData.child('sender').val() == 'user') || root.child('admins').child(auth.uid).val() === true)",
+            ".validate": "newData.hasChildren(['sender', 'text', 'createdAt']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 2000 && (newData.child('sender').val() == 'user' || newData.child('sender').val() == 'admin')"
+          }
+        }
+      },
+      "conversations": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true)",
+          ".write": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).val() === true)"
+        }
+      }
+    },
+    "prediction_markets": {
+      ".read": "auth != null",
+      "$marketId": {
+        ".write": "auth != null && root.child('admins').child(auth.uid).val() === true"
+      }
+    },
+    "prediction_bets": {
+      ".indexOn": ["user_uid"],
+      ".read": "auth != null && ((query.orderByChild == 'user_uid' && query.equalTo == auth.uid) || root.child('admins').child(auth.uid).val() === true)",
+      "$betId": {
+        ".write": "auth != null && (((!data.exists()) && newData.child('user_uid').val() == auth.uid && newData.child('status').val() == 'pending' && newData.child('payout').val() == 0 && newData.child('paid').val() == false) || (data.child('user_uid').val() == auth.uid && data.child('status').val() == 'pending' && newData.child('status').val() == (root.child('prediction_markets').child(data.child('market_id').val()).child('resolution').val() == data.child('side').val() ? 'won' : 'lost') && root.child('prediction_markets').child(data.child('market_id').val()).child('status').val() == 'resolved') || root.child('admins').child(auth.uid).val() === true)"
+      }
+    },
+    "ludo_queue": {
+      ".indexOn": ["player_count", "created_at"],
+      ".read": "auth != null",
+      "$queueId": {
+        ".write": "auth != null && ((!data.exists() && newData.child('player_uid').val() == auth.uid) || (data.exists() && data.child('player_uid').val() == auth.uid) || (data.child('status').val() == 'searching' && newData.child('status').val() == 'matched') || (data.child('status').val() == 'searching' && data.child('created_at').val() < now - 60000))"
+      }
+    },
+    "ludo_matches": {
+      ".read": "auth != null",
+      "$matchId": {
+        ".write": "auth != null && ((!data.exists() && newData.child('created_by').val() == auth.uid) || (data.exists() && !data.child('reward_paid').val() && newData.child('reward_paid').val() == true && newData.child('winner_uid').val() == auth.uid) || (data.exists() && data.child('reward_paid').val() == true && !data.child('winner_uid').exists() && newData.child('winner_uid').val() == auth.uid && newData.child('status').val() == 'finished'))"
+      }
+    },
+    "ludo_events": {
+      "$matchId": {
+        ".read": "auth != null",
+        "$eventId": {
+          ".write": "auth != null && !data.exists() && newData.child('actor_uid').val() == auth.uid",
+          ".validate": "newData.hasChildren(['seq', 'actor_uid', 'kind'])"
+        }
+      }
+    },
+    "ludo_results": {
+      ".read": "auth != null",
+      "$resultId": {
+        ".write": "auth != null && !data.exists() && newData.child('winner_uid').val() == auth.uid",
+        ".validate": "newData.hasChildren(['match_id', 'winner_uid', 'bet_amount', 'reward_amount', 'player_count']) && newData.child('reward_amount').val() == newData.child('bet_amount').val() * 2"
+      }
+    }
+  }
+}

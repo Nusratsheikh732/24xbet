@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>7 Up 7 Down - Live Casino Dice Game</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #160208;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .game-shell {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #2b0612 0%, #3d0919 35%, #2a0510 75%, #1c030a 100%);
+      box-shadow: 0 0 50px rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* Ornate floral/paisley board pattern */
+    .paisley-bg {
+      background-image:
+        radial-gradient(circle at 50% 45%, rgba(165, 38, 52, 0.42) 0%, rgba(78, 12, 22, 0.72) 100%),
+        url("/assets/paisley_tile.jpg");
+      background-size: cover, 140px 140px;
+      background-position: center;
+    }
+
+    /* Gold serif numbers on board */
+    .board-num {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 900;
+      background: linear-gradient(180deg, #fff59d 0%, #ffd700 45%, #e69b00 85%, #fff176 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.85));
+    }
+
+    .board-seven {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 4.3rem;
+      line-height: 1;
+      background: linear-gradient(180deg, #fffde7 0%, #ffd600 40%, #d48800 80%, #ffea00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.9));
+    }
+
+    /* Zone Borders & Shapes */
+    .bet-board-wrap {
+      position: relative;
+      width: 92%;
+      height: 350px;
+      margin: 4px auto 2px auto;
+    }
+
+    .zone-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 168px;
+      border-radius: 56px 56px 8px 8px;
+      border: 2.5px solid #e0a938;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.65), 0 0 8px rgba(224, 169, 56, 0.25);
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      overflow: hidden;
+    }
+
+    .zone-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 168px;
+      border-radius: 8px 8px 56px 56px;
+      border: 2.5px solid #e0a938;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.65), 0 0 8px rgba(224, 169, 56, 0.25);
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      overflow: hidden;
+    }
+
+    /* Outer cutout ring around center 7 */
+    .zone-center-outer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 164px;
+      height: 164px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #350615;
+      border: 2.5px solid #c9932b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      box-shadow: 0 0 16px rgba(0,0,0,0.85);
+    }
+
+    .zone-center {
+      position: relative;
+      width: 146px;
+      height: 146px;
+      border-radius: 50%;
+      border: 2.5px solid #f3c24d;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 0 10px rgba(243, 194, 77, 0.35);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+      overflow: hidden;
+    }
+
+    .zone-top:active, .zone-bottom:active, .zone-center:active {
+      transform: scale(0.992);
+    }
+
+    .zone-win-glow {
+      border-color: #fff176 !important;
+      box-shadow: inset 0 0 38px rgba(255, 215, 0, 0.75), 0 0 26px rgba(255, 235, 59, 0.95) !important;
+      animation: pulseWin 0.55s infinite alternate;
+    }
+
+    @keyframes pulseWin {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.32); }
+    }
+
+    /* Lightning bolt corner badge */
+    .bolt-badge {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 15;
+    }
+    .bolt-active {
+      filter: drop-shadow(0 0 10px #ffee58) drop-shadow(0 0 20px #ffab00);
+      transform: scale(1.18);
+    }
+
+    /* Trapezoid status banner */
+    .status-shield {
+      position: relative;
+      min-width: 168px;
+      height: 40px;
+      padding: 2px 22px;
+      clip-path: polygon(0% 0%, 100% 0%, 88% 100%, 12% 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px solid rgba(255,255,255,0.45);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      transition: background 0.3s ease;
+    }
+    .status-green {
+      background: linear-gradient(180deg, #1b4d3e 0%, #207352 55%, #144936 100%);
+    }
+    .status-locked {
+      background: linear-gradient(180deg, #7b1fa2 0%, #ad1457 55%, #6a1b4d 100%);
+    }
+
+    /* Flying Chip on Board */
+    .board-chip {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      margin-left: -14px;
+      margin-top: -14px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 10px;
+      color: #374151;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.65), inset 0 1px 2px rgba(255,255,255,0.9);
+      pointer-events: none;
+      z-index: 25;
+      transition: transform 0.38s cubic-bezier(0.2, 0.85, 0.32, 1.08), left 0.38s cubic-bezier(0.2, 0.85, 0.32, 1.08), top 0.38s cubic-bezier(0.2, 0.85, 0.32, 1.08), opacity 0.3s ease;
+      background: radial-gradient(circle, #ffffff 54%, #cbd5e1 56%, #94a3b8 100%);
+      border: 3px dashed #64748b;
+    }
+    .board-chip::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      border: 1.5px solid #94a3b8;
+      background: #f8fafc;
+      z-index: -1;
+    }
+    .board-chip.user-chip {
+      background: radial-gradient(circle, #ffffff 54%, #f472b6 56%, #db2777 100%);
+      border: 3px dashed #ec4899;
+      color: #831843;
+      box-shadow: 0 0 10px rgba(236, 72, 153, 0.85), 0 3px 6px rgba(0,0,0,0.75);
+      z-index: 30;
+    }
+    .board-chip.user-chip::after {
+      border-color: #f472b6;
+      background: #fff1f2;
+    }
+
+    /* Main User Chip Selector Button */
+    .main-chip-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #ec4899 0deg 30deg, #ffffff 30deg 60deg,
+        #ec4899 60deg 90deg, #ffffff 90deg 120deg,
+        #ec4899 120deg 150deg, #ffffff 150deg 180deg,
+        #ec4899 180deg 210deg, #ffffff 210deg 240deg,
+        #ec4899 240deg 270deg, #ffffff 270deg 300deg,
+        #ec4899 300deg 330deg, #ffffff 330deg 360deg
+      );
+      padding: 6px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.85), 0 0 12px rgba(236, 72, 153, 0.55);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .main-chip-btn:active {
+      transform: scale(0.92);
+    }
+    .main-chip-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #f1f5f9 80%, #cbd5e1 100%);
+      border: 2px solid #f472b6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+      color: #0f172a;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+    }
+
+    /* Top Stage & Animated Dealer Canvas */
+    .stage-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 864 / 384;
+      background: #2c0712;
+      overflow: hidden;
+      border-bottom: 3px solid #6b4423;
+    }
+
+    .dealer-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Center animated canvas aligned pixel-for-pixel with x=192..672 of 864 */
+    .dealer-sprite-canvas {
+      position: absolute;
+      top: 0;
+      left: 22.2222%;
+      width: 55.5556%;
+      height: 100%;
+      z-index: 8;
+      cursor: pointer;
+    }
+
+    /* Top-down red table center overlay during dice reveal (exact same 55.5556% slot) */
+    .dice-table-overlay {
+      position: absolute;
+      top: 0;
+      left: 22.2222%;
+      width: 55.5556%;
+      height: 100%;
+      background-image: url("/assets/open_dish_bg.jpg");
+      background-size: 100% 100%;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s ease;
+      z-index: 12;
+      overflow: hidden;
+    }
+    .dice-table-overlay.visible {
+      opacity: 1;
+    }
+
+    /* Container for the 2 rolled 3D dice sitting inside the green dish of open_dish_bg.jpg */
+    .green-dish-outer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .green-dish-inner {
+      position: relative;
+      width: 42%;
+      height: 52%;
+      margin-top: 2%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      z-index: 14;
+    }
+
+    /* Hidden fallback dome element to preserve DOM ID compatibility */
+    .black-dome-lid {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Full Transparent Cutout of Girl's Hand + Black Dome Lid (300x240 aspect matching overlay) */
+    .hand-lid-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      z-index: 22;
+      opacity: 0;
+      transform: translate(0%, -18%) scale(0.98);
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 14px rgba(0,0,0,0.75));
+    }
+    .hand-lid-img.grabbing {
+      opacity: 1;
+      transform: translate(0%, 0%) scale(1);
+    }
+    .hand-lid-img.shaking {
+      opacity: 1;
+      animation: realHandShake 0.11s infinite alternate;
+    }
+    @keyframes realHandShake {
+      0% { transform: translate(-4.5%, -2.5%) rotate(-2.5deg); }
+      50% { transform: translate(4.5%, 3%) rotate(2.5deg); }
+      100% { transform: translate(-3.5%, 2%) rotate(-1.5deg); }
+    }
+    /* Slides the black lid & hand off to the right just like 00:21-00:22 in the video! */
+    .dome-lifted {
+      opacity: 0 !important;
+      transform: translate(58%, 4%) rotate(8deg) !important;
+      transition: transform 0.58s cubic-bezier(0.25, 0.9, 0.35, 1), opacity 0.45s ease 0.12s !important;
+    }
+
+    /* Big Red Glowing Total Number on Stage */
+    .stage-sum-num {
+      position: absolute;
+      left: 3%;
+      top: 14%;
+      font-family: 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 2.35rem;
+      color: #ef4444;
+      -webkit-text-stroke: 1.5px #ffffff;
+      text-shadow: 0 0 14px #ff1744, 0 0 28px #d50000, 0 3px 6px rgba(0,0,0,0.9);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 25;
+    }
+    .stage-sum-num.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* 3D Cream Dice inside dish & history */
+    .die-3d {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: linear-gradient(145deg, #fffdf9 0%, #ede6da 100%);
+      border: 1.5px solid #d6cbb9;
+      box-shadow: 2px 5px 8px rgba(0,0,0,0.7), inset 0 1px 2px #ffffff;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 4px;
+      align-items: center;
+      justify-items: center;
+      transition: transform 0.25s ease;
+    }
+    .die-hist {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1.5px solid #64748b;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 3px;
+      align-items: center;
+      justify-items: center;
+    }
+    .pip {
+      width: 5.5px;
+      height: 5.5px;
+      border-radius: 50%;
+      background: #111827;
+    }
+    .pip.red {
+      background: #dc2626;
+      width: 6px;
+      height: 6px;
+    }
+    .pip.big-red {
+      background: #b91c1c;
+      width: 8.5px;
+      height: 8.5px;
+    }
+    .die-hist .pip {
+      width: 4.5px;
+      height: 4.5px;
+    }
+    .die-hist .pip.red {
+      width: 5px;
+      height: 5px;
+    }
+    .die-hist .pip.big-red {
+      width: 7.5px;
+      height: 7.5px;
+    }
+
+    /* ===== Casino-style round chips (drawer) ===== */
+    .chip-opt {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      background: radial-gradient(circle, #ffffff 0 36%, var(--c) 38% 100%);
+      color: #fff;
+      font-weight: 900;
+      font-size: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.8);
+      box-shadow: 0 4px 6px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.35);
+      transition: transform .15s ease, box-shadow .15s ease;
+      isolation: isolate;
+      cursor: pointer;
+    }
+    .chip-opt::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(#ffffff 0deg 14deg, var(--c) 14deg 28deg);
+      z-index: -1;
+    }
+    .chip-opt.active,
+    .chip-opt:active {
+      transform: scale(1.18) translateY(-4px);
+      box-shadow: 0 0 0 3px #ffd700, 0 0 14px rgba(255,215,0,.7), 0 6px 10px rgba(0,0,0,.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="game-shell" id="gameShell">
+
+    <!-- Hidden Sprite Sheet Image Loaded by Canvas -->
+    <img id="dealerSpritesImg" src="/assets/dealer_sprites.jpg" alt="Dealer Sprites" class="hidden" />
+
+    <!-- 1. TOP STAGE (DEALER + RICHEST + BIG WINNERS + DICE BOWL) -->
+    <div class="stage-container" id="stageContainer">
+      <img src="/assets/stage_clean.jpg" alt="Dealer Stage" class="dealer-img" id="dealerImg" />
+
+      <!-- Live Frame-by-Frame Dealer Canvas (Shaking Dice Cup in Both Hands + Setting on Table + Idle + Camera Pan) -->
+      <canvas id="dealerSpriteCanvas" width="300" height="240" class="dealer-sprite-canvas" title="Tap dealer to shake dice"></canvas>
+
+      <!-- Top Translucent Info Bar -->
+      <div class="absolute top-0 left-0 right-0 h-7 bg-black/55 backdrop-blur-[1px] px-2.5 flex items-center justify-between text-[11px] text-gray-100 font-medium z-30 border-b border-white/10">
+        <div class="flex items-center gap-1">
+          <span>Min. Bet :</span>
+          <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-400 text-[#451a03] font-black text-[9px]">🪙</span>
+          <span id="minBetHeader" class="font-bold text-white">5</span>
+        </div>
+        <div class="text-gray-200 tracking-tight">ID : <span id="userIdHeader">019121227777</span></div>
+        <div class="text-gray-200 tracking-tight">Round ID: <span id="roundIdHeader">SUD-W46qQluK</span></div>
+      </div>
+
+      <!-- Live Side Player Balance Overlays -->
+      <div id="sideRichest1" class="absolute left-[6.2%] top-[36.5%] w-[8.5%] text-center text-[9px] font-extrabold text-amber-200 pointer-events-none z-20 opacity-0 transition-opacity"></div>
+      <div id="sideWinner2" class="absolute right-[6.2%] top-[61.8%] w-[8.5%] text-center text-[9px] font-extrabold text-emerald-200 pointer-events-none z-20 opacity-0 transition-opacity"></div>
+
+      <!-- Center Top-Down Red Table & Cloche Dish (Shown during DICE ROLL / REVEAL) -->
+      <div class="dice-table-overlay" id="diceTableOverlay">
+        <div class="stage-sum-num" id="stageSumNum">10</div>
+
+        <div class="green-dish-outer" id="greenDishOuter">
+          <div class="green-dish-inner" id="greenDishInner">
+            <div class="die-3d" id="stageDie1" style="transform: rotate(-28deg) translate(-2px, 4px);"></div>
+            <div class="die-3d" id="stageDie2" style="transform: rotate(22deg) translate(2px, -3px);"></div>
+          </div>
+
+          <div class="black-dome-lid" id="blackDomeLid">
+            <div class="black-dome-knob"></div>
+          </div>
+
+          <!-- Realistic Cutout Hand + Black Dome Lid -->
+          <img src="/assets/hand_dome.png" alt="Dealer Hand on Lid" class="hand-lid-img" id="handLidImg" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MIDDLE CONTROL BAR (Players Count | Timer Shield | Min-Max | Menu) -->
+    <div class="relative w-full px-2.5 py-1 flex items-center justify-between bg-[#2b0510] border-b border-[#4a0e20] z-20">
+      <!-- Left: Online Players Counter -->
+      <button id="onlinePlayersBtn" type="button" class="flex items-center gap-1.5 bg-[#1b030a]/90 border border-amber-500/30 rounded-md px-2.5 py-1 text-amber-400 hover:bg-[#320815] active:scale-95 transition">
+        <svg class="w-5 h-5 fill-amber-400" viewBox="0 0 24 24">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+        <span id="onlineCountText" class="font-extrabold text-sm text-amber-300">78</span>
+      </button>
+
+      <!-- Center: Next Round / Place bet now / BET LOCKED! Shield -->
+      <div class="status-shield status-green" id="statusShield">
+        <span id="statusLabel" class="text-[10px] font-semibold text-gray-100 leading-none tracking-wide">Next Round</span>
+        <span id="statusTimer" class="text-xl font-black text-yellow-300 leading-tight drop-shadow">2</span>
+      </div>
+
+      <!-- Right: Min/Max Dropdown & Hamburger Menu -->
+      <div class="flex items-center gap-1.5">
+        <button id="limitSelectBtn" type="button" class="flex items-center gap-2 bg-[#1b030a]/90 border border-amber-500/30 rounded-md px-2 py-0.5 text-[10px] text-amber-300 hover:bg-[#320815] active:scale-95 transition">
+          <div class="flex flex-col items-center leading-tight">
+            <span id="limitMinText" class="font-extrabold text-xs text-amber-400">5</span>
+            <span class="text-[9px] text-amber-200/80">Min</span>
+          </div>
+          <div class="flex flex-col items-center leading-tight">
+            <span id="limitMaxText" class="font-extrabold text-xs text-amber-400">520</span>
+            <span class="text-[9px] text-amber-200/80">Max</span>
+          </div>
+          <span class="text-amber-400 text-[10px]">▼</span>
+        </button>
+
+        <button id="menuBtn" type="button" aria-label="Game Menu" class="p-1.5 rounded-md bg-[#1b030a]/90 border border-amber-500/30 text-amber-400 hover:bg-[#320815] active:scale-95 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. MAIN BETTING BOARD (8~12 | 7 | 2~6) -->
+    <div class="bet-board-wrap" id="betBoardWrap">
+      <!-- Floating layer where all animated chips land -->
+      <div id="chipsLayer" class="absolute inset-0 pointer-events-none z-30"></div>
+
+      <!-- TOP ZONE: 8 ~ 12 (1:1) -->
+      <div id="zoneHigh" class="zone-top paisley-bg flex flex-col items-center justify-start pt-2.5">
+        <div class="board-num text-4xl tracking-wider leading-none">8 ~ 12</div>
+        <div id="payoutHigh" class="text-xs font-bold text-gray-100 mt-1 drop-shadow">1:1</div>
+
+        <!-- User Stake Pill on Zone -->
+        <div id="userBetHighBadge" class="hidden mt-1 px-2.5 py-0.5 rounded-full bg-pink-600/90 border border-pink-300 text-[11px] font-extrabold text-white shadow-lg">
+          My Bet: 🪙 <span id="userBetHighVal">0</span>
+        </div>
+
+        <!-- Lightning Bolt Bottom-Right -->
+        <div id="boltHigh" class="bolt-badge bottom-2 right-3 text-amber-400/50">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+          <span id="multHighText" class="hidden font-black text-sm text-yellow-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"></span>
+        </div>
+      </div>
+
+      <!-- CENTER CIRCLE: 7 (1:4) -->
+      <div class="zone-center-outer">
+        <div id="zoneSeven" class="zone-center paisley-bg">
+          <!-- Top Lightning Semicircle Badge -->
+          <div id="boltSeven" class="bolt-badge top-1 left-1/2 -translate-x-1/2 text-amber-400/50">
+            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+            <span id="multSevenText" class="hidden font-black text-sm text-yellow-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"></span>
+          </div>
+
+          <div class="board-seven mt-3">7</div>
+          <div id="payoutSeven" class="text-xs font-bold text-gray-100 mt-0.5 drop-shadow">1:4</div>
+
+          <!-- User Stake Pill on Zone 7 -->
+          <div id="userBetSevenBadge" class="hidden mt-0.5 px-2 py-0.5 rounded-full bg-pink-600/90 border border-pink-300 text-[10px] font-extrabold text-white shadow-lg">
+            🪙 <span id="userBetSevenVal">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ZONE: 2 ~ 6 (1:1) -->
+      <div id="zoneLow" class="zone-bottom paisley-bg flex flex-col items-center justify-end pb-2.5">
+        <!-- User Stake Pill on Zone -->
+        <div id="userBetLowBadge" class="hidden mb-1 px-2.5 py-0.5 rounded-full bg-pink-600/90 border border-pink-300 text-[11px] font-extrabold text-white shadow-lg">
+          My Bet: 🪙 <span id="userBetLowVal">0</span>
+        </div>
+
+        <div class="board-num text-4xl tracking-wider leading-none">2 ~ 6</div>
+        <div id="payoutLow" class="text-xs font-bold text-gray-100 mt-1 drop-shadow">1:1</div>
+
+        <!-- Lightning Bolt Top-Right -->
+        <div id="boltLow" class="bolt-badge top-2 right-3 text-amber-400/50">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+          <span id="multLowText" class="hidden font-black text-sm text-yellow-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win Banner Toast Overlay -->
+    <div id="winBanner" class="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 opacity-0 scale-75 transition-all duration-300">
+      <div class="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 text-[#3b0714] font-black text-xl shadow-[0_0_35px_rgba(251,191,36,0.95)] border-2 border-white text-center">
+        <div id="winBannerTitle" class="text-xs uppercase tracking-widest text-red-900">YOU WON!</div>
+        <div id="winBannerAmount" class="text-2xl">+ 🪙 100</div>
+      </div>
+    </div>
+
+    <!-- 4. PLAYER FOOTER BAR (User Avatar + Balance | Chip Selector / Total Stake | Quick Actions) -->
+    <div class="relative w-full px-2.5 py-1.5 flex items-center justify-between bg-gradient-to-b from-[#2a0510] to-[#1a0209] border-t border-amber-500/20 z-20">
+      <!-- Left: User Avatar & Balance -->
+      <div class="flex items-center gap-2">
+        <div class="relative w-12 h-12 rounded-md p-0.5 bg-gradient-to-b from-amber-300 to-amber-600 shadow-md">
+          <img src="/assets/av_user.jpg" alt="Player Avatar" class="w-full h-full object-cover rounded-[4px] border border-cyan-300" />
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs font-extrabold text-white tracking-tight">019121227777...</span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-400 text-[#451a03] font-black text-[10px] shadow">👑</span>
+            <span id="userBalanceText" class="text-sm font-black text-amber-400">500</span>
+            <button id="addCoinsBtn" type="button" title="Add Free Coins" class="ml-1 px-1.5 py-0.5 rounded bg-amber-500/25 border border-amber-400/50 text-[10px] font-bold text-amber-200 hover:bg-amber-500/40 active:scale-95 transition">
+              +🪙
+            </button>
+          </div>
+          <span class="text-[10px] font-extrabold text-gray-200 tracking-wide mt-0.5">7 UP 7 DOWN</span>
+        </div>
+      </div>
+
+      <!-- Center: Selected Chip Button OR Total Stake (Matches Video Behavior) -->
+      <div class="flex flex-col items-center justify-center">
+        <button id="mainChipBtn" type="button" class="main-chip-btn" title="Tap to change chip value">
+          <div class="main-chip-inner" id="selectedChipText">5</div>
+        </button>
+        <div id="totalStakeBox" class="hidden flex-col items-center justify-center py-1">
+          <div class="flex items-center gap-1">
+            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-400 text-[#451a03] font-black text-[10px]">👑</span>
+            <span id="totalStakeText" class="text-sm font-black text-amber-400">0</span>
+          </div>
+          <span class="text-xs font-extrabold text-white">Total Stake</span>
+        </div>
+      </div>
+
+      <!-- Right: Sound & Rebet Controls -->
+      <div class="flex items-center gap-1.5">
+        <button id="rebetBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-[#3b0a19] border border-amber-400/40 text-[11px] font-bold text-amber-200 hover:bg-[#520f24] active:scale-95 transition">
+          Rebet
+        </button>
+        <button id="soundToggleBtn" type="button" aria-label="Toggle Sound" class="p-2 rounded-lg bg-[#3b0a19] border border-amber-400/40 text-amber-300 hover:bg-[#520f24] active:scale-95 transition">
+          <span id="soundIcon">🔊</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chip Denominations Popup Drawer (When clicking center chip) -->
+    <div id="chipDrawer" class="hidden w-full bg-[#1e040c]/95 border-t border-amber-400/30 px-3 py-3 flex items-center justify-center gap-2.5 z-30">
+      <button type="button" data-chip="5" class="chip-opt" style="--c:#e91e8c">5</button>
+      <button type="button" data-chip="10" class="chip-opt" style="--c:#2b2f8f">10</button>
+      <button type="button" data-chip="20" class="chip-opt" style="--c:#f0a500">20</button>
+      <button type="button" data-chip="50" class="chip-opt" style="--c:#7b3fd1">50</button>
+      <button type="button" data-chip="100" class="chip-opt" style="--c:#1fa3d9">100</button>
+      <button type="button" data-chip="520" class="chip-opt" style="--c:#d7262e">520</button>
+    </div>
+
+    <!-- 5. BOTTOM STATS BAR & 11-COLUMN DICE HISTORY TABLE -->
+    <div class="w-full bg-[#d4d8dd] text-[#111827] z-20">
+      <!-- Stats Percentages Strip -->
+      <div class="grid grid-cols-4 border-y border-gray-400 bg-gradient-to-b from-[#eef0f3] to-[#cfd4da] text-xs font-bold">
+        <div class="flex items-center justify-between px-2.5 py-1 border-r border-gray-400">
+          <span class="font-serif italic font-black text-base text-[#5c111b]">2 ~ 6</span>
+          <span id="statLowPct" class="text-[11px] font-bold text-gray-800">32%</span>
+        </div>
+        <div class="flex items-center justify-between px-2.5 py-1 border-r border-gray-400">
+          <span class="font-serif italic font-black text-base text-[#5c111b]">8 ~ 12</span>
+          <span id="statHighPct" class="text-[11px] font-bold text-gray-800">50%</span>
+        </div>
+        <div class="flex items-center justify-between px-2.5 py-1 border-r border-gray-400">
+          <span class="font-serif italic font-black text-base text-[#5c111b]">7</span>
+          <span id="statSevenPct" class="text-[11px] font-bold text-gray-800">18%</span>
+        </div>
+        <div class="flex flex-col items-center justify-center px-1 py-0.5 text-[9px] leading-tight text-gray-800 font-semibold text-center">
+          <span>calculated from</span>
+          <span>last 60 rounds</span>
+        </div>
+      </div>
+
+      <!-- 11-Column Dice Roll History Grid -->
+      <div id="historyGrid" class="grid grid-cols-11 gap-0.5 px-1.5 py-1.5 bg-[#cfd4da] items-center justify-items-center">
+        <!-- Populated dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- IN-PAGE MODAL (For Online Players, Rules, & Wallet Refill) -->
+    <div id="infoModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+      <div class="w-full max-w-sm rounded-2xl bg-[#2a0612] border-2 border-amber-400/60 text-white p-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-white/15 pb-2 mb-3">
+          <h3 id="modalTitle" class="font-extrabold text-amber-300 text-base">7 UP 7 DOWN - Game Menu</h3>
+          <button id="closeModalBtn" type="button" class="w-7 h-7 rounded-full bg-white/10 text-white font-bold hover:bg-white/20">✕</button>
+        </div>
+        <div id="modalBody" class="text-xs text-gray-200 space-y-3 leading-relaxed"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // INITIAL GAME STATE (Starts with Next Round so Girl immediately shakes dice!)
+    // =========================================================================
+    const INITIAL_HISTORY = [
+      { d1: 1, d2: 6, sum: 11 },
+      { d1: 6, d2: 1, sum: 7 },
+      { d1: 2, d2: 5, sum: 7 },
+      { d1: 1, d2: 4, sum: 5 },
+      { d1: 5, d2: 3, sum: 8 },
+      { d1: 6, d2: 6, sum: 12 },
+      { d1: 6, d2: 1, sum: 7 },
+      { d1: 5, d2: 4, sum: 9 },
+      { d1: 4, d2: 3, sum: 7 },
+      { d1: 5, d2: 5, sum: 10 },
+      { d1: 5, d2: 5, sum: 10 }
+    ];
+    // Fix first column d1=6, d2=5 -> sum=11
+    INITIAL_HISTORY[0] = { d1: 6, d2: 5, sum: 11 };
+
+    const state = {
+      phase: 'NEXT_ROUND', // Starts at NEXT_ROUND (2..1..0) just like 00:00 of the video!
+      timer: 2,
+      onlineCount: 74,
+      userBalance: 500,
+      selectedChip: 5,
+      userBets: { low: 0, seven: 0, high: 0 },
+      lastBets: { low: 0, seven: 0, high: 0 },
+      lightningZone: null,
+      lightningMult: 1,
+      history60: [
+        ...Array(18).fill({ d1: 2, d2: 3, sum: 5 }),
+        ...Array(24).fill({ d1: 5, d2: 4, sum: 9 }),
+        ...Array(7).fill({ d1: 3, d2: 4, sum: 7 }),
+        ...INITIAL_HISTORY
+      ],
+      soundEnabled: true,
+      audioCtx: null,
+      bgmStep: 0,
+      // Sprite animation state for the dealer canvas:
+      // Modes: 'GIRL_SHAKING' | 'GIRL_PLACING' | 'GIRL_IDLE' | 'PAN_DOWN' | 'PAN_UP'
+      animMode: 'GIRL_SHAKING',
+      spriteFrame: 0,
+      shakeQueue: []
+    };
+
+    const BOT_SOURCES = [
+      { x: 6, y: -25 },
+      { x: 6, y: -15 },
+      { x: 6, y: -5 },
+      { x: 94, y: -25 },
+      { x: 94, y: -15 },
+      { x: 94, y: -5 },
+      { x: 12, y: -4 }
+    ];
+
+    // =========================================================================
+    // DEALER SPRITE SHEET ANIMATOR (30 Frames extracted from Video)
+    // Frames 0..13: Girl holding black dice shaker cup in BOTH hands & shaking dice
+    // Frames 14..19: Girl setting black dice cup down on table & opening right hand
+    // Frames 20..24: Girl idle breathing, smiling, blinking during betting
+    // Frames 25..29: Camera panning down from girl across table edge to black dome
+    // =========================================================================
+    function drawDealerSpriteFrame(frameIndex) {
+      const canvas = document.getElementById('dealerSpriteCanvas');
+      const img = document.getElementById('dealerSpritesImg');
+      if (!canvas || !img || !img.complete) return;
+      const ctx = canvas.getContext('2d');
+      const idx = Math.max(0, Math.min(29, Math.round(frameIndex)));
+      const col = idx % 5;
+      const row = Math.floor(idx / 5);
+      ctx.clearRect(0, 0, 300, 240);
+      ctx.drawImage(img, col * 300, row * 240, 300, 240, 0, 0, 300, 240);
+    }
+
+    function playGirlShakeAnimation(includePickup = false) {
+      // Builds a rich multi-shake frame sequence of the girl shaking the black dice cup in both hands,
+      // then setting the cup down on the table and opening her right hand!
+      const pickupSeq = includePickup ? [18, 17, 16, 15, 14] : [];
+      const shakeLoop1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+      const shakeLoop2 = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+      const placeDownSeq = [14, 15, 16, 17, 18, 19];
+      state.shakeQueue = [...pickupSeq, ...shakeLoop1, ...shakeLoop2, ...placeDownSeq];
+      state.animMode = 'GIRL_SHAKING';
+      playDiceRattle();
+    }
+
+    function startDealerAnimationLoop() {
+      let idleIdx = 0;
+      const idleFrames = [19, 20, 21, 22, 23, 24, 23, 22, 21, 20];
+      let tick = 0;
+
+      setInterval(() => {
+        tick++;
+        if (state.animMode === 'GIRL_SHAKING') {
+          if (state.shakeQueue.length > 0) {
+            state.spriteFrame = state.shakeQueue.shift();
+            drawDealerSpriteFrame(state.spriteFrame);
+          } else {
+            state.animMode = 'GIRL_IDLE';
+            state.spriteFrame = 19;
+            drawDealerSpriteFrame(19);
+          }
+        } else if (state.animMode === 'GIRL_IDLE') {
+          // Advance idle frame every ~180ms (every 2 ticks)
+          if (tick % 2 === 0) {
+            idleIdx = (idleIdx + 1) % idleFrames.length;
+            state.spriteFrame = idleFrames[idleIdx];
+            drawDealerSpriteFrame(state.spriteFrame);
+          }
+        } else if (state.animMode === 'CUSTOM_SEQ') {
+          if (state.shakeQueue.length > 0) {
+            state.spriteFrame = state.shakeQueue.shift();
+            drawDealerSpriteFrame(state.spriteFrame);
+          }
+        }
+      }, 78); // ~13 fps smooth sprite playback matching video cadence
+    }
+
+    // =========================================================================
+    // WEB AUDIO SYNTHESIZER (Marimba Melody + Chip Clink + Dice Rattle)
+    // =========================================================================
+    function ensureAudio() {
+      if (!state.audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          state.audioCtx = new AudioContextClass();
+        }
+      }
+      if (state.audioCtx && state.audioCtx.state === 'suspended') {
+        state.audioCtx.resume();
+      }
+    }
+
+    function playChipSound(isUser = false) {
+      if (!state.soundEnabled) return;
+      ensureAudio();
+      if (!state.audioCtx) return;
+      const now = state.audioCtx.currentTime;
+      const osc = state.audioCtx.createOscillator();
+      const gain = state.audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isUser ? 2650 : 2200 + Math.random() * 450, now);
+      osc.frequency.exponentialRampToValueAtTime(3600, now + 0.045);
+      gain.gain.setValueAtTime(isUser ? 0.14 : 0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+      osc.connect(gain);
+      gain.connect(state.audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.06);
+    }
+
+    function playMarimbaTick() {
+      if (!state.soundEnabled || state.phase !== 'BETTING') return;
+      ensureAudio();
+      if (!state.audioCtx) return;
+      const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 783.99, 523.25];
+      const freq = notes[state.bgmStep % notes.length];
+      state.bgmStep++;
+      const now = state.audioCtx.currentTime;
+      const osc = state.audioCtx.createOscillator();
+      const gain = state.audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(state.audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.19);
+    }
+
+    function playLockSound() {
+      if (!state.soundEnabled) return;
+      ensureAudio();
+      if (!state.audioCtx) return;
+      const now = state.audioCtx.currentTime;
+      [440, 554.37, 659.25].forEach((f, idx) => {
+        const osc = state.audioCtx.createOscillator();
+        const gain = state.audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f, now + idx * 0.06);
+        gain.gain.setValueAtTime(0.07, now + idx * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.25);
+        osc.connect(gain);
+        gain.connect(state.audioCtx.destination);
+        osc.start(now + idx * 0.06);
+        osc.stop(now + idx * 0.06 + 0.26);
+      });
+    }
+
+    function playDiceRattle() {
+      if (!state.soundEnabled) return;
+      ensureAudio();
+      if (!state.audioCtx) return;
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          if (!state.soundEnabled || !state.audioCtx) return;
+          const now = state.audioCtx.currentTime;
+          const osc = state.audioCtx.createOscillator();
+          const gain = state.audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(850 + Math.random() * 950, now);
+          gain.gain.setValueAtTime(0.065, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.042);
+          osc.connect(gain);
+          gain.connect(state.audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.045);
+        }, i * 115);
+      }
+    }
+
+    function speakRollResult(d1, d2, sum) {
+      if (!state.soundEnabled) return;
+      if ('speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+          const msg = new SpeechSynthesisUtterance(`${d1}, ${d2}, ${sum}`);
+          msg.lang = 'en-US';
+          msg.rate = 0.95;
+          msg.pitch = 1.15;
+          window.speechSynthesis.speak(msg);
+        } catch (e) {}
+      }
+    }
+
+    // =========================================================================
+    // DICE PIP RENDERER (Red Pips for 1 & 4, Black Pips for 2, 3, 5, 6)
+    // =========================================================================
+    const PIP_POSITIONS = {
+      1: [4],
+      2: [0, 8],
+      3: [0, 4, 8],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 3, 6, 2, 5, 8]
+    };
+
+    function renderDiePips(container, val) {
+      container.innerHTML = '';
+      const active = PIP_POSITIONS[val] || [4];
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        if (active.includes(i)) {
+          if (val === 1) {
+            cell.className = 'pip big-red';
+          } else if (val === 4) {
+            cell.className = 'pip red';
+          } else {
+            cell.className = 'pip';
+          }
+        }
+        container.appendChild(cell);
+      }
+    }
+
+    function renderHistoryBar() {
+      const grid = document.getElementById('historyGrid');
+      grid.innerHTML = '';
+      const last11 = state.history60.slice(-11);
+      last11.forEach((item, idx) => {
+        const isLatest = idx === last11.length - 1;
+        const col = document.createElement('div');
+        col.className = isLatest
+          ? 'flex flex-col items-center justify-between py-1 px-1 rounded-lg bg-[#8cd790] shadow-inner w-full'
+          : 'flex flex-col items-center justify-between py-1 px-0.5 w-full';
+
+        const sumEl = document.createElement('div');
+        sumEl.className = 'font-black text-sm text-[#111827] leading-none mb-1';
+        sumEl.textContent = item.sum;
+
+        const d1El = document.createElement('div');
+        d1El.className = 'die-hist mb-1';
+        renderDiePips(d1El, item.d1);
+
+        const d2El = document.createElement('div');
+        d2El.className = 'die-hist';
+        renderDiePips(d2El, item.d2);
+
+        col.appendChild(sumEl);
+        col.appendChild(d1El);
+        col.appendChild(d2El);
+        grid.appendChild(col);
+      });
+
+      const total = state.history60.length || 1;
+      let lowCount = 0, highCount = 0, sevenCount = 0;
+      state.history60.forEach(r => {
+        if (r.sum < 7) lowCount++;
+        else if (r.sum > 7) highCount++;
+        else sevenCount++;
+      });
+      const lowPct = Math.round((lowCount / total) * 100);
+      const highPct = Math.round((highCount / total) * 100);
+      const sevenPct = Math.max(0, 100 - lowPct - highPct);
+
+      document.getElementById('statLowPct').textContent = `${lowPct}%`;
+      document.getElementById('statHighPct').textContent = `${highPct}%`;
+      document.getElementById('statSevenPct').textContent = `${sevenPct}%`;
+    }
+
+    // =========================================================================
+    // CHIP FLYING & BETTING SYSTEM
+    // =========================================================================
+    function getZoneTargetCoords(zone) {
+      const board = document.getElementById('betBoardWrap');
+      const W = (board && board.clientWidth) ? board.clientWidth : 340;
+      const H = (board && board.clientHeight) ? board.clientHeight : 350;
+      const cx = W / 2;
+      const cy = H / 2;
+
+      // Outer ring radius is 82px (164px / 2), inner ring radius is 73px (146px / 2), chip radius is 14px.
+      const safeOuterRadius = 82 + 14 + 18; // 114px minimum center-to-center distance from (cx, cy)
+      const safeInnerRadius = 73 - 14 - 18; // 41px maximum center-to-center distance inside '7'
+
+      if (zone === 'seven') {
+        const angle = Math.random() * Math.PI * 2;
+        const rPx = Math.sqrt(Math.random()) * safeInnerRadius;
+        const px = cx + Math.cos(angle) * rPx;
+        const py = cy + 4 + Math.sin(angle) * (rPx * 0.85);
+        return { x: (px / W) * 100, y: (py / H) * 100 };
+      }
+
+      if (zone === 'high') {
+        let px, py;
+        const pick = Math.random();
+        if (pick < 0.44) {
+          // Left wing of 8 ~ 12
+          px = W * (0.11 + Math.random() * 0.14);
+          py = H * (0.12 + Math.random() * 0.20);
+        } else if (pick < 0.88) {
+          // Right wing of 8 ~ 12
+          px = W * (0.75 + Math.random() * 0.14);
+          py = H * (0.12 + Math.random() * 0.19);
+        } else {
+          // Top arch beside '8 ~ 12'
+          px = W * (0.37 + Math.random() * 0.26);
+          py = H * (0.08 + Math.random() * 0.05);
+        }
+        // Hard radial push-out if ever closer than safeOuterRadius to center (cx, cy)
+        const dx = px - cx;
+        const dy = py - cy;
+        const dist = Math.hypot(dx, dy) || 1;
+        if (dist < safeOuterRadius) {
+          const scale = (safeOuterRadius + 4) / dist;
+          px = cx + dx * scale;
+          py = cy + dy * scale;
+        }
+        // Clamp strictly inside top zone borders (away from top arch & horizontal divider at H*0.48)
+        px = Math.max(24, Math.min(W - 24, px));
+        py = Math.max(24, Math.min(H * 0.36, py));
+        return { x: (px / W) * 100, y: (py / H) * 100 };
+      }
+
+      // zone === 'low' (2 ~ 6)
+      let px, py;
+      const pick = Math.random();
+      if (pick < 0.43) {
+        // Bottom-left wing of 2 ~ 6
+        px = W * (0.11 + Math.random() * 0.15);
+        py = H * (0.68 + Math.random() * 0.18);
+      } else if (pick < 0.86) {
+        // Bottom-right wing of 2 ~ 6
+        px = W * (0.74 + Math.random() * 0.15);
+        py = H * (0.68 + Math.random() * 0.18);
+      } else {
+        // Bottom arch beside '2 ~ 6'
+        px = W * (0.37 + Math.random() * 0.26);
+        py = H * (0.86 + Math.random() * 0.05);
+      }
+      // Hard radial push-out if ever closer than safeOuterRadius to center (cx, cy)
+      const dx = px - cx;
+      const dy = py - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist < safeOuterRadius) {
+        const scale = (safeOuterRadius + 4) / dist;
+        px = cx + dx * scale;
+        py = cy + dy * scale;
+      }
+      // Clamp strictly inside bottom zone borders (away from bottom arch & horizontal divider at H*0.52)
+      px = Math.max(24, Math.min(W - 24, px));
+      py = Math.max(H * 0.64, Math.min(H - 24, py));
+      return { x: (px / W) * 100, y: (py / H) * 100 };
+    }
+
+    function spawnChipOnBoard(zone, amount, isUser = false) {
+      const layer = document.getElementById('chipsLayer');
+      const chip = document.createElement('div');
+      chip.className = isUser ? 'board-chip user-chip' : 'board-chip';
+      chip.dataset.zone = zone;
+      chip.textContent = amount;
+
+      const start = isUser
+        ? { x: 50, y: 112 }
+        : BOT_SOURCES[Math.floor(Math.random() * BOT_SOURCES.length)];
+      const target = getZoneTargetCoords(zone);
+
+      chip.style.left = `${start.x}%`;
+      chip.style.top = `${start.y}%`;
+      chip.style.transform = 'scale(0.65)';
+      layer.appendChild(chip);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          chip.style.left = `${target.x}%`;
+          chip.style.top = `${target.y}%`;
+          chip.style.transform = `scale(1) rotate(${Math.floor(Math.random() * 26 - 13)}deg)`;
+        });
+      });
+
+      playChipSound(isUser);
+    }
+
+    function updateUserBetUI() {
+      const { low, seven, high } = state.userBets;
+      const total = low + seven + high;
+      document.getElementById('userBalanceText').textContent = state.userBalance;
+      document.getElementById('totalStakeText').textContent = total;
+
+      const lowBadge = document.getElementById('userBetLowBadge');
+      const sevenBadge = document.getElementById('userBetSevenBadge');
+      const highBadge = document.getElementById('userBetHighBadge');
+
+      if (low > 0) {
+        lowBadge.classList.remove('hidden');
+        document.getElementById('userBetLowVal').textContent = low;
+      } else {
+        lowBadge.classList.add('hidden');
+      }
+
+      if (seven > 0) {
+        sevenBadge.classList.remove('hidden');
+        document.getElementById('userBetSevenVal').textContent = seven;
+      } else {
+        sevenBadge.classList.add('hidden');
+      }
+
+      if (high > 0) {
+        highBadge.classList.remove('hidden');
+        document.getElementById('userBetHighVal').textContent = high;
+      } else {
+        highBadge.classList.add('hidden');
+      }
+    }
+
+    function placeUserBet(zone) {
+      ensureAudio();
+      if (state.phase !== 'BETTING') {
+        showMiniToast('Wait for "Place bet now" phase!');
+        return;
+      }
+      if (state.userBalance < state.selectedChip) {
+        state.userBalance += 500;
+        showMiniToast('+500 Free Coins added to your wallet!');
+      }
+      state.userBalance -= state.selectedChip;
+      state.userBets[zone] += state.selectedChip;
+      updateUserBetUI();
+      spawnChipOnBoard(zone, state.selectedChip, true);
+    }
+
+    function clearBoardChips() {
+      document.getElementById('chipsLayer').innerHTML = '';
+      ['zoneLow', 'zoneSeven', 'zoneHigh'].forEach(id => {
+        document.getElementById(id).classList.remove('zone-win-glow');
+      });
+      ['boltLow', 'boltSeven', 'boltHigh'].forEach(id => {
+        document.getElementById(id).classList.remove('bolt-active');
+      });
+      ['multLowText', 'multSevenText', 'multHighText'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.textContent = '';
+      });
+      document.getElementById('payoutLow').textContent = '1:1';
+      document.getElementById('payoutHigh').textContent = '1:1';
+      document.getElementById('payoutSeven').textContent = '1:4';
+    }
+
+    // =========================================================================
+    // LIGHTNING MULTIPLIER EFFECT
+    // =========================================================================
+    function triggerLightningMultiplier() {
+      const zones = ['high', 'seven', 'low'];
+      const chosen = zones[Math.floor(Math.random() * zones.length)];
+      const multOptions = chosen === 'seven' ? [5, 6, 8] : [2, 3, 4];
+      const mult = multOptions[Math.floor(Math.random() * multOptions.length)];
+
+      state.lightningZone = chosen;
+      state.lightningMult = mult;
+
+      const boltMap = {
+        low: { bolt: 'boltLow', text: 'multLowText', payout: 'payoutLow' },
+        seven: { bolt: 'boltSeven', text: 'multSevenText', payout: 'payoutSeven' },
+        high: { bolt: 'boltHigh', text: 'multHighText', payout: 'payoutHigh' }
+      };
+
+      zones.forEach((z, i) => {
+        setTimeout(() => {
+          document.getElementById(boltMap[z].bolt).classList.add('bolt-active');
+          setTimeout(() => {
+            if (z !== chosen) {
+              document.getElementById(boltMap[z].bolt).classList.remove('bolt-active');
+            }
+          }, 260);
+        }, i * 140);
+      });
+
+      setTimeout(() => {
+        const target = boltMap[chosen];
+        document.getElementById(target.bolt).classList.add('bolt-active');
+        const txtEl = document.getElementById(target.text);
+        txtEl.textContent = `${mult}X`;
+        txtEl.classList.remove('hidden');
+        document.getElementById(target.payout).textContent = `1:${mult}`;
+      }, 480);
+    }
+
+    // =========================================================================
+    // ROUND STATE MACHINE (With Real Video Dealer Dice Shaking & Pan Animation!)
+    // =========================================================================
+    function generateRoundId() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+      let suffix = '';
+      for (let i = 0; i < 8; i++) {
+        suffix += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return `SUD-${suffix}`;
+    }
+
+    function setShieldState(label, timerVal, isLocked = false) {
+      const shield = document.getElementById('statusShield');
+      const labelEl = document.getElementById('statusLabel');
+      const timerEl = document.getElementById('statusTimer');
+
+      if (isLocked) {
+        shield.className = 'status-shield status-locked';
+        labelEl.className = 'text-xs font-extrabold text-white tracking-wider uppercase';
+        labelEl.textContent = 'BET LOCKED!';
+        timerEl.classList.add('hidden');
+      } else {
+        shield.className = 'status-shield status-green';
+        labelEl.className = 'text-[10px] font-semibold text-gray-100 leading-none tracking-wide';
+        labelEl.textContent = label;
+        timerEl.classList.remove('hidden');
+        timerEl.textContent = timerVal;
+      }
+    }
+
+    function startNextRoundCountdown() {
+      state.phase = 'NEXT_ROUND';
+      state.timer = 2;
+      state.lightningZone = null;
+      state.lightningMult = 1;
+
+      const totalPrev = state.userBets.low + state.userBets.seven + state.userBets.high;
+      if (totalPrev > 0) {
+        state.lastBets = { ...state.userBets };
+      }
+      state.userBets = { low: 0, seven: 0, high: 0 };
+      updateUserBetUI();
+      clearBoardChips();
+
+      document.getElementById('roundIdHeader').textContent = generateRoundId();
+      document.getElementById('mainChipBtn').classList.remove('hidden');
+      document.getElementById('totalStakeBox').classList.add('hidden');
+      document.getElementById('totalStakeBox').classList.remove('flex');
+
+      // Hide top-down dice overlay and trigger the Girl Shaking the Dice Cup in Both Hands (Frames 0..19)!
+      document.getElementById('diceTableOverlay').classList.remove('visible');
+      document.getElementById('stageSumNum').classList.remove('show');
+      document.getElementById('blackDomeLid').classList.remove('dome-lifted');
+      document.getElementById('handLidImg').className = 'hand-lid-img';
+
+      playGirlShakeAnimation(false);
+      setShieldState('Next Round', state.timer, false);
+    }
+
+    function startBettingPhase() {
+      state.phase = 'BETTING';
+      state.timer = 13;
+      setShieldState('Place bet now', state.timer, false);
+    }
+
+    function startLockedAndRollSequence() {
+      state.phase = 'LOCKED';
+      setShieldState('BET LOCKED!', '', true);
+      playLockSound();
+
+      // Switch footer center from Chip to Total Stake
+      document.getElementById('chipDrawer').classList.add('hidden');
+      document.getElementById('mainChipBtn').classList.add('hidden');
+      const stakeBox = document.getElementById('totalStakeBox');
+      stakeBox.classList.remove('hidden');
+      stakeBox.classList.add('flex');
+
+      // 1. Right when BET LOCKED! starts, the Girl picks up the black dice cup in both hands,
+      // shakes the dice vigorously, sets the cup back on the table, and then the camera pans down!
+      state.animMode = 'CUSTOM_SEQ';
+      state.shakeQueue = [
+        18, 16, 14,                         // Girl picks up the black dice cup from the table
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, // Girl shakes the dice cup in both hands
+        6, 7, 8, 9, 10, 11, 12, 13,         // Extra shake
+        14, 15, 16, 17, 18,                 // Girl sets the black dice cup down on the table
+        25, 26, 27, 28, 29                  // Camera pans down across table edge to the closed black dome!
+      ];
+      playDiceRattle();
+
+      // Trigger Lightning Bolt Multiplier on Board
+      setTimeout(() => {
+        triggerLightningMultiplier();
+      }, 450);
+
+      // 2. As camera pan finishes (at ~2.6s), show top-down crimson table with Girl's Hand grabbing & shaking the black dome lid!
+      setTimeout(() => {
+        state.phase = 'ROLLING';
+        const d1 = Math.floor(Math.random() * 6) + 1;
+        const d2 = Math.floor(Math.random() * 6) + 1;
+        const sum = d1 + d2;
+
+        const die1El = document.getElementById('stageDie1');
+        const die2El = document.getElementById('stageDie2');
+        renderDiePips(die1El, d1);
+        renderDiePips(die2El, d2);
+        die1El.style.transform = `rotate(${-26 + Math.floor(Math.random() * 12)}deg) translate(-2px, 3px)`;
+        die2El.style.transform = `rotate(${18 + Math.floor(Math.random() * 14)}deg) translate(2px, -3px)`;
+        document.getElementById('stageSumNum').textContent = sum;
+
+        const overlay = document.getElementById('diceTableOverlay');
+        const handImg = document.getElementById('handLidImg');
+        const domeLid = document.getElementById('blackDomeLid');
+
+        domeLid.classList.remove('dome-lifted');
+        handImg.className = 'hand-lid-img grabbing';
+        overlay.classList.add('visible');
+
+        // Hand shakes the black dome lid over the dish
+        setTimeout(() => {
+          handImg.classList.add('shaking');
+          playDiceRattle();
+        }, 180);
+
+        // Hand slides the black dome lid off to the right (exact match to 00:21.5 in video!)
+        setTimeout(() => {
+          state.phase = 'REVEAL';
+          handImg.classList.remove('shaking');
+          handImg.classList.add('dome-lifted');
+          domeLid.classList.add('dome-lifted');
+
+          // Show red glowing sum on left & speak result
+          setTimeout(() => {
+            document.getElementById('stageSumNum').classList.add('show');
+            speakRollResult(d1, d2, sum);
+            resolveRoundOutcome(d1, d2, sum);
+          }, 380);
+        }, 1350);
+
+        // Hand brings the black dome lid back from the right to cover the dish (exact match to 00:28 in video!)
+        setTimeout(() => {
+          document.getElementById('stageSumNum').classList.remove('show');
+          handImg.classList.remove('dome-lifted');
+          domeLid.classList.remove('dome-lifted');
+        }, 4800);
+
+        // Camera pans back up from the table to the Girl (Frames 29 -> 25), then starts Next Round where Girl shakes dice!
+        setTimeout(() => {
+          overlay.classList.remove('visible');
+          state.animMode = 'CUSTOM_SEQ';
+          state.shakeQueue = [29, 28, 27, 26, 25];
+        }, 5450);
+
+        setTimeout(() => {
+          startNextRoundCountdown();
+        }, 5900);
+      }, 2550);
+    }
+
+    function resolveRoundOutcome(d1, d2, sum) {
+      let winZone = 'seven';
+      let winZoneId = 'zoneSeven';
+      if (sum < 7) {
+        winZone = 'low';
+        winZoneId = 'zoneLow';
+      } else if (sum > 7) {
+        winZone = 'high';
+        winZoneId = 'zoneHigh';
+      }
+
+      document.getElementById(winZoneId).classList.add('zone-win-glow');
+
+      state.history60.push({ d1, d2, sum });
+      if (state.history60.length > 60) {
+        state.history60.shift();
+      }
+      renderHistoryBar();
+
+      const userStakeOnWin = state.userBets[winZone];
+      if (userStakeOnWin > 0) {
+        let ratio = winZone === 'seven' ? 4 : 1;
+        if (state.lightningZone === winZone) {
+          ratio = state.lightningMult;
+        }
+        const totalReturn = userStakeOnWin + userStakeOnWin * ratio;
+        state.userBalance += totalReturn;
+        updateUserBetUI();
+        showWinBanner(totalReturn);
+      }
+    }
+
+    function showWinBanner(amount) {
+      const banner = document.getElementById('winBanner');
+      document.getElementById('winBannerTitle').textContent = 'CONGRATULATIONS!';
+      document.getElementById('winBannerAmount').textContent = `+ 🪙 ${amount}`;
+      banner.classList.remove('opacity-0', 'scale-75');
+      banner.classList.add('opacity-100', 'scale-100');
+      setTimeout(() => {
+        banner.classList.remove('opacity-100', 'scale-100');
+        banner.classList.add('opacity-0', 'scale-75');
+      }, 2600);
+    }
+
+    function showMiniToast(msg) {
+      const banner = document.getElementById('winBanner');
+      document.getElementById('winBannerTitle').textContent = 'NOTICE';
+      document.getElementById('winBannerAmount').textContent = msg;
+      banner.classList.remove('opacity-0', 'scale-75');
+      banner.classList.add('opacity-100', 'scale-100');
+      setTimeout(() => {
+        banner.classList.remove('opacity-100', 'scale-100');
+        banner.classList.add('opacity-0', 'scale-75');
+      }, 1600);
+    }
+
+    // =========================================================================
+    // MAIN 1-SECOND & BOT CHIP LOOP
+    // =========================================================================
+    function startLoops() {
+      setInterval(() => {
+        const delta = Math.floor(Math.random() * 5) - 2;
+        state.onlineCount = Math.max(74, Math.min(99, state.onlineCount + delta));
+        document.getElementById('onlineCountText').textContent = state.onlineCount;
+
+        if (state.phase === 'NEXT_ROUND') {
+          state.timer--;
+          if (state.timer >= 0) {
+            setShieldState('Next Round', state.timer, false);
+          } else {
+            startBettingPhase();
+          }
+        } else if (state.phase === 'BETTING') {
+          playMarimbaTick();
+          state.timer--;
+          if (state.timer >= 1) {
+            setShieldState('Place bet now', state.timer, false);
+          } else {
+            startLockedAndRollSequence();
+          }
+        }
+      }, 1000);
+
+      // Simulated multiplayer chip throwing during BETTING phase
+      setInterval(() => {
+        if (state.phase !== 'BETTING') return;
+        const count = Math.floor(Math.random() * 3) + 1;
+        const denoms = [5, 5, 5, 10, 10, 20, 30, 60];
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            if (state.phase !== 'BETTING') return;
+            const r = Math.random();
+            const zone = r < 0.44 ? 'low' : (r < 0.84 ? 'high' : 'seven');
+            const val = denoms[Math.floor(Math.random() * denoms.length)];
+            spawnChipOnBoard(zone, val, false);
+          }, i * 110);
+        }
+      }, 380);
+    }
+
+    // =========================================================================
+    // UI EVENT LISTENERS
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      renderHistoryBar();
+      updateUserBetUI();
+      renderDiePips(document.getElementById('stageDie1'), 5);
+      renderDiePips(document.getElementById('stageDie2'), 5);
+
+      // Initialize dealer sprite sheet & start Girl Shaking Dice immediately on load!
+      const spriteImg = document.getElementById('dealerSpritesImg');
+      const initSprites = () => {
+        drawDealerSpriteFrame(0);
+        playGirlShakeAnimation(false);
+        startDealerAnimationLoop();
+      };
+      if (spriteImg.complete) {
+        initSprites();
+      } else {
+        spriteImg.addEventListener('load', initSprites);
+      }
+
+      // Clicking/tapping the dealer canvas lets the user watch the girl shake the dice cup anytime during betting!
+      document.getElementById('dealerSpriteCanvas').addEventListener('click', () => {
+        ensureAudio();
+        if (state.phase === 'BETTING' || state.phase === 'NEXT_ROUND') {
+          playGirlShakeAnimation(true);
+        }
+      });
+
+      // Zone click handlers
+      document.getElementById('zoneHigh').addEventListener('click', () => placeUserBet('high'));
+      document.getElementById('zoneSeven').addEventListener('click', (e) => {
+        e.stopPropagation();
+        placeUserBet('seven');
+      });
+      document.getElementById('zoneLow').addEventListener('click', () => placeUserBet('low'));
+
+      // Chip drawer toggle
+      const drawer = document.getElementById('chipDrawer');
+      document.getElementById('mainChipBtn').addEventListener('click', () => {
+        ensureAudio();
+        drawer.classList.toggle('hidden');
+        document.querySelectorAll('.chip-opt').forEach(b =>
+          b.classList.toggle('active', parseInt(b.dataset.chip, 10) === state.selectedChip));
+      });
+
+      document.querySelectorAll('.chip-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.chip, 10);
+          document.querySelectorAll('.chip-opt').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.selectedChip = val;
+          document.getElementById('selectedChipText').textContent = val;
+          drawer.classList.add('hidden');
+          playChipSound(true);
+        });
+      });
+
+      // Add free coins button
+      document.getElementById('addCoinsBtn').addEventListener('click', () => {
+        ensureAudio();
+        state.userBalance += 1000;
+        updateUserBetUI();
+        showMiniToast('+ 🪙 1,000 Added!');
+      });
+
+      // Rebet button
+      document.getElementById('rebetBtn').addEventListener('click', () => {
+        ensureAudio();
+        if (state.phase !== 'BETTING') {
+          showMiniToast('Rebet available during betting!');
+          return;
+        }
+        const totalNeed = state.lastBets.low + state.lastBets.seven + state.lastBets.high;
+        if (totalNeed === 0) {
+          placeUserBet('low');
+          return;
+        }
+        if (state.userBalance < totalNeed) {
+          state.userBalance += 1000;
+        }
+        ['low', 'seven', 'high'].forEach(z => {
+          if (state.lastBets[z] > 0) {
+            state.userBalance -= state.lastBets[z];
+            state.userBets[z] += state.lastBets[z];
+            spawnChipOnBoard(z, state.lastBets[z], true);
+          }
+        });
+        updateUserBetUI();
+      });
+
+      // Sound toggle button
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊' : '🔇';
+        if (state.soundEnabled) ensureAudio();
+      });
+
+      // Modal handlers
+      const modal = document.getElementById('infoModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+
+      document.getElementById('closeModalBtn').addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      });
+
+      document.getElementById('onlinePlayersBtn').addEventListener('click', () => {
+        modalTitle.textContent = `Online Players (${state.onlineCount})`;
+        modalBody.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between p-2 rounded bg-white/5"><span>🥇 No.1 t***351 (Richest)</span><span class="text-amber-300 font-bold">🪙 8,200</span></div>
+            <div class="flex justify-between p-2 rounded bg-white/5"><span>🥈 No.2 n***mmn</span><span class="text-amber-300 font-bold">🪙 4,010</span></div>
+            <div class="flex justify-between p-2 rounded bg-white/5"><span>🥉 No.3 h***999</span><span class="text-amber-300 font-bold">🪙 4,000.92</span></div>
+            <div class="flex justify-between p-2 rounded bg-white/5"><span>🏆 Big Winner m***122</span><span class="text-emerald-300 font-bold">🪙 1,380</span></div>
+            <div class="flex justify-between p-2 rounded bg-white/5"><span>🏆 Big Winner H***Hot</span><span class="text-emerald-300 font-bold">🪙 1,333.33</span></div>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      });
+
+      document.getElementById('limitSelectBtn').addEventListener('click', () => {
+        drawer.classList.toggle('hidden');
+      });
+
+      document.getElementById('menuBtn').addEventListener('click', () => {
+        modalTitle.textContent = '7 UP 7 DOWN — Rules & Payouts';
+        modalBody.innerHTML = `
+          <p><strong>How to Play:</strong> Tap on a chip value (5, 10, 20, 50, 100, 520) at the bottom, then tap any of the 3 zones on the board during the <em>"Place bet now"</em> countdown.</p>
+          <ul class="list-disc pl-4 space-y-1">
+            <li><strong>2 ~ 6 (7 Down):</strong> Wins if the 2-dice total is 2, 3, 4, 5, or 6. Standard payout <strong>1:1</strong>.</li>
+            <li><strong>8 ~ 12 (7 Up):</strong> Wins if the 2-dice total is 8, 9, 10, 11, or 12. Standard payout <strong>1:1</strong>.</li>
+            <li><strong>Lucky 7:</strong> Wins if the 2-dice total is exactly 7. Standard payout <strong>1:4</strong>.</li>
+            <li><strong>⚡ Lightning Multiplier:</strong> After bets lock, lightning strikes a random zone and boosts its payout up to <strong>8X</strong>!</li>
+          </ul>
+        `;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      });
+
+      startLoops();
+    });
+  </script>
+</body>
+</html>
