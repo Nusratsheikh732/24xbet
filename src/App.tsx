@@ -26,6 +26,7 @@ import SignInPage from '@/pages/SignInPage';
 import BonusPage from '@/pages/BonusPage';
 import RescueFundPage from '@/pages/RescueFundPage';
 import StandaloneGamePage from '@/pages/StandaloneGamePage';
+import CoinTossLoader from '@/components/CoinTossLoader';
 import AirdropPage from '@/pages/AirdropPage';
 import TradingApp from '@/TradingDemo';
 import SpinWheelGame from '@/SpinWheelGame';
@@ -415,7 +416,10 @@ function AppContent() {
           <StandaloneGamePage title="Crazy Time" src="/crazy-time/index.html" onBack={() => setActivePage('home')} />
         )}
         {activePage === 'cointoss' && (
-          <StandaloneGamePage title="Coin Toss" src="/coin-toss-game.html" onBack={() => setActivePage('home')} />
+          <>
+            <StandaloneGamePage title="Coin Toss" src="/coin-toss-game.html" onBack={() => setActivePage('home')} />
+            <CoinTossLoader />
+          </>
         )}
         {activePage === 'predictionmarket' && (
           <PredictionMarketPage
