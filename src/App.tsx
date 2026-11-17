@@ -282,6 +282,14 @@ function AppContent() {
             onAddPrediction={handleAddPrediction}
             isAuthenticated={Boolean(user)}
             onRequireAuth={() => setShowAuth(true)}
+            onDeposit={() => {
+              if (!user) { setShowAuth(true); return; }
+              setShowDeposit(true);
+            }}
+            onWithdraw={() => {
+              if (!user) { setShowAuth(true); return; }
+              setShowWithdraw(true);
+            }}
             onOpenAviator={() => openProtectedPage('aviator')}
             onOpenSuperAce={() => openProtectedPage('superace')}
             onOpenRoulette={() => {

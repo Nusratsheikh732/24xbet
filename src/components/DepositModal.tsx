@@ -223,21 +223,21 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
 
   return (
     <div
-      className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-[9998] bg-white flex items-end sm:items-center justify-center"
       onClick={handleClose}
     >
       <div
-        className="bg-dark-card w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-dark-border animate-fade-in-up max-h-[calc(90vh-7rem)] mb-28 sm:mb-0 overflow-y-auto"
+        className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-gray-200 animate-fade-in-up max-h-[calc(90vh-7rem)] mb-28 sm:mb-0 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between z-10">
-          <h3 className="font-display text-lg font-bold text-white">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+          <h3 className="font-display text-lg font-bold text-gray-900">
             {step === 'done' ? t('deposit.success') : step === 'trxid' ? t('deposit.verifyPayment') : step === 'network' ? 'Select Network' : t('header.deposit')}
           </h3>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-white transition-colors"
+            className="text-gray-600 hover:text-gray-900 transition-colors"
           >
             <X size={20} />
           </button>
@@ -246,7 +246,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
         {/* Step: Method selection */}
         {step === 'method' && (
           <div className="p-4 animate-fade-in-up">
-            <p className="text-xs text-gray-400 font-semibold mb-3">{t('deposit.selectMethod')}</p>
+            <p className="text-xs text-gray-600 font-semibold mb-3">{t('deposit.selectMethod')}</p>
             <div className="grid grid-cols-3 gap-2.5">
               {depositMethods.map((method) => {
                 const bonus = BONUS_METHODS[method.id];
@@ -254,7 +254,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                   <button
                     key={method.id}
                     onClick={() => handleMethodSelect(method)}
-                    className="relative bg-dark-card2 border border-dark-border rounded-xl p-3 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
+                    className="relative bg-gray-50 border border-gray-200 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
                   >
                     {bonus > 0 && (
                       <span className="absolute -top-1.5 -right-1.5 bg-neon-green text-dark-bg text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
@@ -262,7 +262,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                       </span>
                     )}
                     <PaymentLogo methodId={method.id} size={38} />
-                    <span className="text-xs font-semibold text-white text-center leading-tight">{t(`payment.${method.id}`)}</span>
+                    <span className="text-xs font-semibold text-gray-900 text-center leading-tight">{t(`payment.${method.id}`)}</span>
                   </button>
                 );
               })}
@@ -275,7 +275,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
           <div className="p-4 animate-fade-in-up">
             <div className="flex items-center gap-3 mb-4">
               <PaymentLogo methodId={selectedMethod.id} size={40} />
-              <span className="text-sm font-semibold text-white">{t(`payment.${selectedMethod.id}`)}</span>
+              <span className="text-sm font-semibold text-gray-900">{t(`payment.${selectedMethod.id}`)}</span>
               {bonusPercent > 0 && (
                 <span className="ml-auto bg-neon-green/15 text-neon-green text-xs font-bold px-2 py-1 rounded-full">
                   +{bonusPercent}% Bonus
@@ -283,15 +283,15 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
               )}
             </div>
 
-            <p className="text-xs text-gray-400 font-semibold mb-2">{t('deposit.enterAmount')}</p>
-            <div className="flex items-center bg-dark-card2 rounded-xl border border-dark-border px-3 py-3">
+            <p className="text-xs text-gray-600 font-semibold mb-2">{t('deposit.enterAmount')}</p>
+            <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 px-3 py-3">
               <span className="text-neon-gold font-bold text-lg mr-1">৳</span>
               <input
                 type="number"
                 value={amount || ''}
                 onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value) || 0))}
                 placeholder="0"
-                className="bg-transparent text-white font-bold w-full outline-none text-lg"
+                className="bg-transparent text-gray-900 font-bold w-full outline-none text-lg"
               />
             </div>
             {amount > 0 && amount < 200 && (
@@ -320,7 +320,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                 <button
                   key={amt}
                   onClick={() => setAmount(amt)}
-                  className="flex-1 bg-dark-card2 hover:bg-dark-border text-xs text-gray-300 font-semibold py-1.5 rounded-lg transition-colors"
+                  className="flex-1 bg-gray-50 hover:bg-gray-200 text-xs text-gray-700 font-semibold py-1.5 rounded-lg transition-colors"
                 >
                   ৳{bn(amt)}
                 </button>
@@ -328,21 +328,21 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             </div>
 
             {amount >= 200 && (
-              <div className="mt-4 rounded-xl border border-dark-border bg-dark-card2/60 p-3">
-                <p className="mb-2 text-xs font-semibold text-gray-300">Promotions</p>
+              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50/60 p-3">
+                <p className="mb-2 text-xs font-semibold text-gray-700">Promotions</p>
                 <button
                   type="button"
                   onClick={() => setIncludeBonus(true)}
                   className={`mb-2 flex w-full items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
                     includeBonus
                       ? 'border-neon-green/50 bg-neon-green/10'
-                      : 'border-dark-border bg-dark-card2 hover:border-neon-green/30'
+                      : 'border-gray-200 bg-gray-50 hover:border-neon-green/30'
                   }`}
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${includeBonus ? 'border-neon-green' : 'border-gray-500'}`}>
                     {includeBonus && <span className="h-2 w-2 rounded-full bg-neon-green" />}
                   </span>
-                  <span className="flex-1 text-xs font-semibold text-white">বোনাস নিতে চাই</span>
+                  <span className="flex-1 text-xs font-semibold text-gray-900">বোনাস নিতে চাই</span>
                   <span className="text-xs font-bold text-neon-green">{bonusPercent > 0 ? `+${bonusPercent}%` : 'Bonus'}</span>
                 </button>
                 <button
@@ -351,13 +351,13 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                   className={`flex w-full items-center gap-2 rounded-lg border p-3 text-left transition-colors ${
                     !includeBonus
                       ? 'border-neon-gold/50 bg-neon-gold/5'
-                      : 'border-dark-border bg-dark-card2 hover:border-neon-gold/30'
+                      : 'border-gray-200 bg-gray-50 hover:border-neon-gold/30'
                   }`}
                 >
                   <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${!includeBonus ? 'border-neon-gold' : 'border-gray-500'}`}>
                     {!includeBonus && <span className="h-2 w-2 rounded-full bg-neon-gold" />}
                   </span>
-                  <span className="text-xs font-semibold text-white">কোনো প্রমোশনে অংশ নেবো না</span>
+                  <span className="text-xs font-semibold text-gray-900">কোনো প্রমোশনে অংশ নেবো না</span>
                 </button>
               </div>
             )}
@@ -365,7 +365,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setStep('method')}
-                className="flex-1 bg-dark-card2 text-gray-300 font-semibold py-3 rounded-xl transition-all hover:bg-dark-border"
+                className="flex-1 bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all hover:bg-gray-200"
               >
                 Back
               </button>
@@ -385,32 +385,32 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
           <div className="p-4 animate-fade-in-up">
             <div className="flex items-center gap-3 mb-4">
               <PaymentLogo methodId={selectedMethod.id} size={40} />
-              <span className="text-sm font-semibold text-white">{t(`payment.${selectedMethod.id}`)}</span>
+              <span className="text-sm font-semibold text-gray-900">{t(`payment.${selectedMethod.id}`)}</span>
             </div>
             <div className="flex items-center gap-2 mb-4">
               <Network size={18} className="text-neon-blue" />
-              <p className="text-sm text-gray-300 font-semibold">Select a network to send USDT</p>
+              <p className="text-sm text-gray-700 font-semibold">Select a network to send USDT</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleNetworkSelect('bsc')}
-                className="bg-dark-card2 border border-dark-border rounded-xl p-4 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
+                className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
               >
-                <span className="text-lg font-bold text-white">BSC</span>
-                <span className="text-xs text-gray-400">Bep20</span>
+                <span className="text-lg font-bold text-gray-900">BSC</span>
+                <span className="text-xs text-gray-600">Bep20</span>
               </button>
               <button
                 onClick={() => handleNetworkSelect('apt')}
-                className="bg-dark-card2 border border-dark-border rounded-xl p-4 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
+                className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col items-center gap-2 hover:border-neon-green/40 transition-all active:scale-95"
               >
-                <span className="text-lg font-bold text-white">APT</span>
-                <span className="text-xs text-gray-400">Aptos</span>
+                <span className="text-lg font-bold text-gray-900">APT</span>
+                <span className="text-xs text-gray-600">Aptos</span>
               </button>
             </div>
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setStep('amount')}
-                className="flex-1 bg-dark-card2 text-gray-300 font-semibold py-3 rounded-xl transition-all hover:bg-dark-border"
+                className="flex-1 bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all hover:bg-gray-200"
               >
                 Back
               </button>
@@ -425,7 +425,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
               <div className="flex justify-center mb-2">
                 <PaymentLogo methodId={selectedMethod.id} size={56} />
               </div>
-              <p className="text-sm text-gray-400">{t('deposit.sendMoney')} {t(`payment.${selectedMethod.id}`)}</p>
+              <p className="text-sm text-gray-600">{t('deposit.sendMoney')} {t(`payment.${selectedMethod.id}`)}</p>
               <p className="font-display text-2xl font-bold text-neon-gold mt-1">
                 ৳{bn(amount.toLocaleString())}
               </p>
@@ -442,12 +442,12 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             </div>
 
             {displayAddress ? (
-              <div className="bg-dark-card2 border border-dark-border rounded-xl p-4 mb-3">
-                <p className="text-xs text-gray-500 font-semibold mb-1">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3">
+                <p className="text-xs text-gray-600 font-semibold mb-1">
                   Send USDT to ({selectedNetwork === 'bsc' ? 'BSC / Bep20' : 'APT / Aptos'})
                 </p>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-sm font-bold text-white tracking-wide break-all">
+                  <span className="font-mono text-sm font-bold text-gray-900 tracking-wide break-all">
                     {displayAddress}
                   </span>
                   <button
@@ -459,12 +459,12 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                 </div>
               </div>
             ) : (
-              <div className="bg-dark-card2 border border-dark-border rounded-xl p-4 mb-3">
-                <p className="text-xs text-gray-500 font-semibold mb-2">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-3">
+                <p className="text-xs text-gray-600 font-semibold mb-2">
                   {t('deposit.sendTo').replace('{method}', t(`payment.${selectedMethod.id}`))}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="font-display text-xl font-bold text-white tracking-wider">
+                  <span className="font-display text-xl font-bold text-gray-900 tracking-wider">
                     {getPaymentNumber(selectedMethod.id)}
                   </span>
                   <button
@@ -488,7 +488,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             <div className="flex gap-2">
               <button
                 onClick={() => isUsdt ? setStep('network') : setStep('amount')}
-                className="flex-1 bg-dark-card2 text-gray-300 font-semibold py-3 rounded-xl transition-all hover:bg-dark-border"
+                className="flex-1 bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all hover:bg-gray-200"
               >
                 Back
               </button>
@@ -509,10 +509,10 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
               <div className="w-14 h-14 bg-neon-green/10 rounded-full flex items-center justify-center mx-auto mb-3">
                 {isUsdt ? <Network size={28} className="text-neon-green" /> : isNicknameMethod ? <User size={28} className="text-neon-green" /> : <Phone size={28} className="text-neon-green" />}
               </div>
-              <h4 className="font-display text-lg font-bold text-white mb-1">
+              <h4 className="font-display text-lg font-bold text-gray-900 mb-1">
                 {isUsdt ? 'Transaction ID (Trx ID)' : isNicknameMethod ? 'Your Nickname' : 'প্রেরকের নাম্বার'}
               </h4>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-600">
                 {isUsdt
                   ? 'Enter the Transaction ID from your USDT transfer'
                   : isNicknameMethod
@@ -521,42 +521,42 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
               </p>
             </div>
 
-            <div className="bg-dark-card2 border border-dark-border rounded-xl p-3 mb-3">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-500">Amount</span>
+                <span className="text-gray-600">Amount</span>
                 <span className="font-bold text-neon-gold">৳{bn(amount.toLocaleString())}</span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
-                <span className="text-gray-500">Method</span>
-                <span className="font-bold text-white">{t(`payment.${selectedMethod.id}`)}</span>
+                <span className="text-gray-600">Method</span>
+                <span className="font-bold text-gray-900">{t(`payment.${selectedMethod.id}`)}</span>
               </div>
               {isUsdt && selectedNetwork && (
                 <div className="flex items-center justify-between text-xs mt-1">
-                  <span className="text-gray-500">Network</span>
-                  <span className="font-bold text-white">
+                  <span className="text-gray-600">Network</span>
+                  <span className="font-bold text-gray-900">
                     {selectedNetwork === 'bsc' ? 'BSC (Bep20)' : 'APT (Aptos)'}
                   </span>
                 </div>
               )}
               {bonusAmount > 0 && (
                 <div className="flex items-center justify-between text-xs mt-1">
-                  <span className="text-gray-500">Bonus</span>
+                  <span className="text-gray-600">Bonus</span>
                   <span className="font-bold text-neon-green">+৳{bn(bonusAmount.toLocaleString())}</span>
                 </div>
               )}
               {isCryptoMethod && (
                 <div className="flex items-center justify-between text-xs mt-1">
-                  <span className="text-gray-500">≈ Equivalent</span>
+                  <span className="text-gray-600">≈ Equivalent</span>
                   <span className="font-bold text-neon-blue">{cryptoEquivalent}</span>
                 </div>
               )}
             </div>
 
-            <p className="text-xs text-gray-400 font-semibold mb-2">
+            <p className="text-xs text-gray-600 font-semibold mb-2">
               {isUsdt ? 'Transaction ID' : isNicknameMethod ? 'Enter your nickname' : 'যে নাম্বার থেকে টাকা পাঠিয়েছেন সে নাম্বারটি দেন'}
             </p>
-            <div className={`flex items-center bg-dark-card2 rounded-xl border px-4 py-3 transition-colors ${
-              trxError ? 'border-neon-red' : 'border-dark-border focus:border-neon-green/40'
+            <div className={`flex items-center bg-gray-50 rounded-xl border px-4 py-3 transition-colors ${
+              trxError ? 'border-neon-red' : 'border-gray-200 focus:border-neon-green/40'
             }`}>
               {!isUsdt && !isNicknameMethod && <span className="text-neon-gold font-bold mr-2 shrink-0">+88</span>}
               <input
@@ -572,7 +572,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                   setTrxError(false);
                 }}
                 placeholder={isUsdt ? 'e.g. 0x1a2b3c... or TrxID' : isNicknameMethod ? 'Enter your account nickname' : 'যেমন 01903242402'}
-                className={`w-full bg-transparent text-white font-semibold outline-none text-base ${
+                className={`w-full bg-transparent text-gray-900 font-semibold outline-none text-base ${
                   trxError ? 'text-neon-red' : ''
                 }`}
               />
@@ -594,7 +594,7 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             <div className="flex gap-2">
               <button
                 onClick={() => isUsdt ? setStep('send') : setStep('send')}
-                className="flex-1 bg-dark-card2 text-gray-300 font-semibold py-3 rounded-xl transition-all hover:bg-dark-border"
+                className="flex-1 bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl transition-all hover:bg-gray-200"
               >
                 Back
               </button>
@@ -615,10 +615,10 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
             <div className="w-16 h-16 bg-neon-green/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
               <CheckCircle2 size={40} className="text-neon-green" />
             </div>
-            <h3 className="font-display text-xl font-bold text-white mb-1">
+            <h3 className="font-display text-xl font-bold text-gray-900 mb-1">
               {t('deposit.depositSubmitted')}
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-600">
               ৳{bn(amount.toLocaleString())} {t('deposit.pendingVerifyMsg')}
             </p>
             {bonusAmount > 0 && (
@@ -626,8 +626,8 @@ export default function DepositModal({ isOpen, onClose, onDepositComplete }: Dep
                 +৳{bn(bonusAmount.toLocaleString())} bonus included
               </p>
             )}
-            <p className="text-xs text-gray-500 mt-2">
-              {isUsdt ? 'Trx ID' : isNicknameMethod ? 'Nickname' : 'প্রেরকের নাম্বার'}: <span className="font-semibold text-gray-300">{trxId}</span>
+            <p className="text-xs text-gray-600 mt-2">
+              {isUsdt ? 'Trx ID' : isNicknameMethod ? 'Nickname' : 'প্রেরকের নাম্বার'}: <span className="font-semibold text-gray-700">{trxId}</span>
             </p>
           </div>
         )}

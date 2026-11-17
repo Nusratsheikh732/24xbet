@@ -1065,14 +1065,6 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
     <div
       className="flex-1 flex flex-col overflow-hidden min-h-0 relative bg-black"
     >
-      {/* Full background image — object-contain so top & bottom are always visible */}
-      <img
-        src="/assets/MVIMG_20261113_023917.jpg"
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-contain object-center pointer-events-none select-none"
-        style={{ zIndex: 0 }}
-      />
       <style>{`
         @keyframes super-ace-card-shuffle {
           0% { transform: perspective(700px) rotateY(0deg) translateY(0) scale(1); }
@@ -1157,7 +1149,7 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
             <div className="absolute inset-0 -z-10 scale-150 rounded-full bg-[#ff9d00]/35 blur-2xl" />
             <p className="font-display text-[clamp(2.8rem,16vw,6rem)] font-black leading-none tabular-nums text-[#ffe36b]"
               style={{ textShadow: '0 3px 0 #9a3b00, 0 0 8px #fff3a1, 0 0 22px #ffae00, 0 0 48px rgba(255,100,0,.9)' }}>
-              +৳{bn(lastWin.toFixed(2))}
+              {lastWin.toFixed(2)}
             </p>
             {chainLevel > 0 && (
               <p className="text-neon-gold text-[10px] font-bold text-center mt-0.5">Chain x{chainLevel}</p>
@@ -1196,10 +1188,19 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
         </div>
       )}
 
-      {/* Card grid — positioned over the green table area in the background image */}
+      {/* Stage matches the background image's aspect ratio so cards and tap zones stay aligned with the artwork */}
+      <div className="absolute inset-0 flex items-center justify-center" style={{ containerType: 'size' }}>
+      <div className="relative" style={{ width: 'min(100cqw, calc(100cqh * 777 / 1478))', aspectRatio: '777 / 1478' }}>
+      <img
+        src="/assets/IMG_20261113_031303.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full pointer-events-none select-none"
+        style={{ zIndex: 0 }}
+      />
       <div
-        className="absolute left-0 right-0"
-        style={{ top: '43%', bottom: '19%', zIndex: 10 }}
+        className="absolute"
+        style={{ top: '25.5%', left: '2.1%', right: '2.1%', zIndex: 10 }}
       >
         {/* Bet menu popup */}
         {!inFreeGame && showBetMenu && (
@@ -1226,10 +1227,10 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
           </div>
         )}
 
-        <div className="relative h-full w-full flex items-start justify-center px-1 pt-1">
+        <div className="relative w-full">
           <div
-            className="grid gap-1 w-full"
-            style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
+            className="grid w-full"
+            style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)`, columnGap: '2.1%', rowGap: '12px' }}
           >
             {grid.map((cell, idx) => {
               const style = SYMBOL_STYLES[cell.symbol];
@@ -1326,14 +1327,14 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
         }}
         disabled={spinning}
         aria-label="Choose bet"
-        className="absolute bottom-[8%] left-[10%] w-[14%] h-[12%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+        className="absolute left-[24%] top-[85%] w-[14%] h-[8%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
       />
       {/* Spin button tap area */}
       <button
         onClick={spin}
         disabled={freeGameSummary !== null || (!inFreeGame && (balance < bet || bet <= 0))}
         aria-label="Spin"
-        className="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[22%] h-[17%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+        className="absolute left-[38%] top-[83%] w-[24%] h-[13%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
       />
       {/* Auto spin tap area */}
       {autoSpinRemaining === 0 && !inFreeGame && (
@@ -1341,7 +1342,7 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
           onClick={() => setShowAutoSpin(true)}
           disabled={spinning || balance < bet}
           aria-label="Auto spin"
-          className="absolute bottom-[8%] right-[22%] w-[14%] h-[12%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
+          className="absolute left-[64%] top-[85%] w-[14%] h-[8%] opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
       )}
       {/* Stop auto spin */}
@@ -1349,9 +1350,11 @@ export default function SuperAceGame({ balance, onBetPlaced, onWin, loaded = tru
         <button
           onClick={() => setAutoSpinRemaining(0)}
           aria-label="Stop auto"
-          className="absolute bottom-[8%] right-[22%] w-[14%] h-[12%] opacity-0 cursor-pointer"
+          className="absolute left-[64%] top-[85%] w-[14%] h-[8%] opacity-0 cursor-pointer"
         />
       )}
+      </div>
+      </div>
 
       <AutoSpinModal
         isOpen={showAutoSpin}

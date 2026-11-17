@@ -147,27 +147,27 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
 
   return (
     <div
-      className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center"
+      className="fixed inset-0 z-[9998] bg-white flex items-end sm:items-center justify-center"
       onClick={handleClose}
     >
       <div
-        className="bg-dark-card w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-dark-border animate-fade-in-up max-h-[calc(100vh-1rem)] mb-0 overflow-y-auto"
+        className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-gray-200 animate-fade-in-up max-h-[calc(100vh-1rem)] mb-0 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between z-10">
-          <h3 className="font-display text-lg font-bold text-white">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+          <h3 className="font-display text-lg font-bold text-gray-900">
             {step === 'done' ? 'Success' : step === 'network' ? 'Select Network' : 'Withdraw'}
           </h3>
-          <button onClick={handleClose} className="text-gray-500 hover:text-white transition-colors">
+          <button onClick={handleClose} className="text-gray-600 hover:text-gray-900 transition-colors">
             <X size={20} />
           </button>
         </div>
 
         {/* Balance display */}
         <div className="px-4 pt-4">
-          <div className="bg-dark-card2 rounded-xl border border-dark-border p-3 flex items-center justify-between">
-            <span className="text-xs text-gray-400">Available Balance</span>
+          <div className="bg-gray-50 rounded-xl border border-gray-200 p-3 flex items-center justify-between">
+            <span className="text-xs text-gray-600">Available Balance</span>
             <span className="font-display text-lg font-bold text-neon-gold">
               ৳{Math.round(balance).toLocaleString('en-US')}
             </span>
@@ -181,7 +181,7 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
               <Lock size={16} className="text-neon-red shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-xs font-bold text-neon-red">Turnover requirement not met</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">
+                <p className="text-[11px] text-gray-600 mt-0.5">
                   You must play ৳{bn(requiredTurnover.toLocaleString())} more in total bets to unlock withdrawals.
                   Current: ৳{bn(currentTurnover.toLocaleString())} / ৳{bn(requiredTurnover.toLocaleString())}
                 </p>
@@ -193,20 +193,20 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
         {/* Step: Method */}
         {step === 'method' && (
           <div className="p-4 animate-fade-in-up">
-            <p className="text-xs text-gray-400 font-semibold mb-3">Select withdrawal method</p>
+            <p className="text-xs text-gray-600 font-semibold mb-3">Select withdrawal method</p>
             <div className="grid grid-cols-3 gap-2.5">
               {withdrawMethods.map((method) => (
                 <button
                   key={method.id}
                   onClick={() => handleMethodSelect(method)}
-                  className={`relative bg-dark-card2 border rounded-xl p-3 flex flex-col items-center gap-2 transition-all active:scale-95 ${
+                  className={`relative bg-gray-50 border rounded-xl p-3 flex flex-col items-center gap-2 transition-all active:scale-95 ${
                     selectedMethod?.id === method.id
                       ? 'border-neon-green neon-green-glow'
-                      : 'border-dark-border hover:border-gray-600'
+                      : 'border-gray-200 hover:border-gray-600'
                   }`}
                 >
                   <PaymentLogo methodId={method.id} size={40} />
-                  <span className="text-xs font-semibold text-white text-center leading-tight">
+                  <span className="text-xs font-semibold text-gray-900 text-center leading-tight">
                     {t(`payment.${method.id}`)}
                   </span>
                   {selectedMethod?.id === method.id && (
@@ -218,7 +218,7 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
 
             {selectedMethod && !isUsdt && (
               <div className="mt-4 animate-fade-in-up">
-                <p className="text-xs text-gray-400 font-semibold mb-2">
+                <p className="text-xs text-gray-600 font-semibold mb-2">
                   {getFieldLabel()}
                 </p>
                 <input
@@ -226,8 +226,8 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
                   value={accountNumber}
                   onChange={(e) => handleAccountChange(e.target.value)}
                   placeholder={getFieldPlaceholder()}
-                  className={`w-full bg-dark-card2 rounded-xl border px-3 py-3 text-white font-semibold outline-none text-sm transition-colors ${
-                    accountError ? 'border-neon-red' : 'border-dark-border focus:border-neon-green/40'
+                  className={`w-full bg-gray-50 rounded-xl border px-3 py-3 text-gray-900 font-semibold outline-none text-sm transition-colors ${
+                    accountError ? 'border-neon-red' : 'border-gray-200 focus:border-neon-green/40'
                   }`}
                 />
                 {accountError && (
@@ -241,10 +241,10 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
                   </p>
                 )}
                 {isUidMethod && (
-                  <p className="text-[11px] text-gray-500 mt-1">Enter your 8-13 digit UID</p>
+                  <p className="text-[11px] text-gray-600 mt-1">Enter your 8-13 digit UID</p>
                 )}
                 {isMobileMethod && (
-                  <p className="text-[11px] text-gray-500 mt-1">Enter your 11-digit mobile number</p>
+                  <p className="text-[11px] text-gray-600 mt-1">Enter your 11-digit mobile number</p>
                 )}
               </div>
             )}
@@ -253,38 +253,38 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
               <div className="mt-4 animate-fade-in-up">
                 <div className="flex items-center gap-2 mb-3">
                   <Network size={18} className="text-neon-blue" />
-                  <p className="text-sm text-gray-300 font-semibold">Select network</p>
+                  <p className="text-sm text-gray-700 font-semibold">Select network</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <button
                     onClick={() => setSelectedNetwork('apt')}
-                    className={`bg-dark-card2 border rounded-xl p-3 flex flex-col items-center gap-1 transition-all active:scale-95 ${
-                      selectedNetwork === 'apt' ? 'border-neon-green' : 'border-dark-border hover:border-gray-600'
+                    className={`bg-gray-50 border rounded-xl p-3 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                      selectedNetwork === 'apt' ? 'border-neon-green' : 'border-gray-200 hover:border-gray-600'
                     }`}
                   >
-                    <span className="text-base font-bold text-white">APT</span>
-                    <span className="text-xs text-gray-400">Aptos</span>
+                    <span className="text-base font-bold text-gray-900">APT</span>
+                    <span className="text-xs text-gray-600">Aptos</span>
                   </button>
                   <button
                     onClick={() => setSelectedNetwork('bsc')}
-                    className={`bg-dark-card2 border rounded-xl p-3 flex flex-col items-center gap-1 transition-all active:scale-95 ${
-                      selectedNetwork === 'bsc' ? 'border-neon-green' : 'border-dark-border hover:border-gray-600'
+                    className={`bg-gray-50 border rounded-xl p-3 flex flex-col items-center gap-1 transition-all active:scale-95 ${
+                      selectedNetwork === 'bsc' ? 'border-neon-green' : 'border-gray-200 hover:border-gray-600'
                     }`}
                   >
-                    <span className="text-base font-bold text-white">BSC</span>
-                    <span className="text-xs text-gray-400">Bep20</span>
+                    <span className="text-base font-bold text-gray-900">BSC</span>
+                    <span className="text-xs text-gray-600">Bep20</span>
                   </button>
                 </div>
                 {selectedNetwork && (
                   <div className="animate-fade-in-up">
-                    <p className="text-xs text-gray-400 font-semibold mb-2">Withdrawal Address</p>
+                    <p className="text-xs text-gray-600 font-semibold mb-2">Withdrawal Address</p>
                     <input
                       type="text"
                       value={accountNumber}
                       onChange={(e) => handleAccountChange(e.target.value)}
                       placeholder="Enter your wallet address"
-                      className={`w-full bg-dark-card2 rounded-xl border px-3 py-3 text-white font-semibold outline-none text-sm transition-colors ${
-                        accountError ? 'border-neon-red' : 'border-dark-border focus:border-neon-green/40'
+                      className={`w-full bg-gray-50 rounded-xl border px-3 py-3 text-gray-900 font-semibold outline-none text-sm transition-colors ${
+                        accountError ? 'border-neon-red' : 'border-gray-200 focus:border-neon-green/40'
                       }`}
                     />
                     {accountError && (
@@ -299,15 +299,15 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
 
             {selectedMethod && (
               <div className="mt-4 animate-fade-in-up">
-                <p className="text-xs text-gray-400 font-semibold mb-2 mt-4">Withdrawal amount</p>
-                <div className="flex items-center bg-dark-card2 rounded-xl border border-dark-border px-3 py-3">
+                <p className="text-xs text-gray-600 font-semibold mb-2 mt-4">Withdrawal amount</p>
+                <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 px-3 py-3">
                   <span className="text-neon-gold font-bold text-lg mr-1">৳</span>
                   <input
                     type="number"
                     value={amount || ''}
                     onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value) || 0))}
                     placeholder="0"
-                    className="bg-transparent text-white font-bold w-full outline-none text-lg"
+                    className="bg-transparent text-gray-900 font-bold w-full outline-none text-lg"
                   />
                 </div>
                 <div className="flex gap-2 mt-2">
@@ -315,7 +315,7 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
                     <button
                       key={amt}
                       onClick={() => setAmount(amt)}
-                      className="flex-1 bg-dark-card2 hover:bg-dark-border text-xs text-gray-300 font-semibold py-1.5 rounded-lg transition-colors"
+                      className="flex-1 bg-gray-50 hover:bg-gray-200 text-xs text-gray-700 font-semibold py-1.5 rounded-lg transition-colors"
                     >
                       ৳{bn(amt)}
                     </button>
@@ -362,10 +362,10 @@ export default function WithdrawModal({ isOpen, balance, onClose, onWithdraw }: 
             <div className="w-16 h-16 bg-neon-green/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
               <CheckCircle2 size={40} className="text-neon-green" />
             </div>
-            <h3 className="font-display text-xl font-bold text-white mb-1">
+            <h3 className="font-display text-xl font-bold text-gray-900 mb-1">
               Withdrawal Requested!
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-600">
               ৳{bn(amount.toLocaleString())} will be sent to your {t(`payment.${selectedMethod?.id}`)} {isUsdt ? 'wallet' : 'account'}
             </p>
           </div>
